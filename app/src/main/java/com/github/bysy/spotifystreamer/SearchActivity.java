@@ -9,10 +9,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class SearchActivity extends AppCompatActivity {
@@ -30,6 +32,16 @@ public class SearchActivity extends AppCompatActivity {
 
         ListView lv = (ListView) findViewById(R.id.artistListView);
         lv.setAdapter(mAdapter);
+
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Artist x = (Artist) parent.getItemAtPosition(position);
+                // TODO: build intent and start top songs activity in OnItemClickListener
+                Toast t = Toast.makeText(parent.getContext(), x.getName(), Toast.LENGTH_SHORT);
+                t.show();
+            }
+        });
     }
 
 
