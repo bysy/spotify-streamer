@@ -1,6 +1,8 @@
 package com.github.bysy.spotifystreamer;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,6 +14,17 @@ public class TopSongsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_songs);
+        Intent in = getIntent();
+        String name = in.getStringExtra(SearchActivity.ARTIST_NAME);
+        if (name==null) {
+            // TODO: handling of missing name should be more user-friendly
+            finish();
+        }
+        ActionBar ab = getSupportActionBar();
+        if (ab==null) {
+            return;
+        }
+        ab.setTitle(name);
     }
 
 

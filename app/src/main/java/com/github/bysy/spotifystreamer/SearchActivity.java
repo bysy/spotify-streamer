@@ -15,12 +15,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 public class SearchActivity extends AppCompatActivity {
     private Artist[] mArtists;
     private ArtistAdapter mAdapter;
+    static final String ARTIST_NAME = "artist_name";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +38,8 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Artist x = (Artist) parent.getItemAtPosition(position);
-                Toast t = Toast.makeText(parent.getContext(), x.getName(), Toast.LENGTH_SHORT);
-                t.show();
-                // TODO: pass along artist data/id when starting TopSongsActivity
                 Intent i = new Intent(getApplicationContext(), TopSongsActivity.class);
+                i.putExtra(ARTIST_NAME, x.getName());
                 startActivity(i);
             }
         });
