@@ -27,7 +27,7 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         // TODO: replace mock with live data
-        mArtists = mockArtists;
+        mArtists = sMockArtists;
         mAdapter = new ArtistAdapter(this, R.layout.single_artist, mArtists);
 
         ListView lv = (ListView) findViewById(R.id.artistListView);
@@ -67,8 +67,8 @@ public class SearchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private final Artist[] mockArtists = makeMockArtists();
-    private Artist[] makeMockArtists() {
+    private static final Artist[] sMockArtists = makeMockArtists();
+    private static Artist[] makeMockArtists() {
         final int w = 256;
         final int h = 256;
         final Bitmap.Config c = Bitmap.Config.ARGB_8888;
