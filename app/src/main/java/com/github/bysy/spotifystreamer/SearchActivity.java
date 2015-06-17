@@ -1,6 +1,7 @@
 package com.github.bysy.spotifystreamer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -37,9 +38,11 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Artist x = (Artist) parent.getItemAtPosition(position);
-                // TODO: build intent and start top songs activity in OnItemClickListener
                 Toast t = Toast.makeText(parent.getContext(), x.getName(), Toast.LENGTH_SHORT);
                 t.show();
+                // TODO: pass along artist data/id when starting TopSongsActivity
+                Intent i = new Intent(getApplicationContext(), TopSongsActivity.class);
+                startActivity(i);
             }
         });
     }
