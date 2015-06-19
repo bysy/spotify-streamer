@@ -16,7 +16,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:hint="Search artist"
-        android:imeOptions="actionDone"
+        android:imeOptions="actionSearch"
         android:inputType="text"
         android:singleLine="true"
         android:elevation="4dp" />
