@@ -1,20 +1,31 @@
 package com.github.bysy.spotifystreamer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import java.util.List;
+
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
 
 
 public class SearchActivity extends AppCompatActivity {
@@ -43,6 +54,29 @@ public class SearchActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
+        EditText et = (EditText) findViewById(R.id.searchText);
+        et.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId != EditorInfo.IME_ACTION_SEARCH) return false;
+                String searchStr = v.getText().toString();
+                if (searchStr.length() == 0) return true;
+                ArtistsSearcher search = new ArtistsSearcher();
+                search.execute(searchStr);
+                hideKeyboard();
+                return true;
+            }
+        });
+    }
+
+    private void hideKeyboard() {
+        // This is tricky. There are many ways that work but this one fits
+        // nicely here. And yes, it actually hides the keyboard instead of
+        // just toggling it.
+        // Thanks to http://stackoverflow.com/a/15587937
+        InputMethodManager imm = (InputMethodManager)
+                getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
     }
 
 
@@ -68,6 +102,34 @@ public class SearchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    class ArtistsSearcher extends AsyncTask<String, Void, List<kaaes.spotify.webapi.android.models.Artist> > {
+        @Override
+        protected List<kaaes.spotify.webapi.android.models.Artist>
+        doInBackground(String... strings) {
+            if (strings.length==0) return null;
+            String searchStr = strings[0];
+            SpotifyApi spotApi = new SpotifyApi();
+            SpotifyService spot = spotApi.getService();
+
+            List<kaaes.spotify.webapi.android.models.Artist> res;
+            res = spot.searchArtists(searchStr).artists.items;
+            return res;
+        }
+        @Override
+        protected void onPostExecute(List<kaaes.spotify.webapi.android.models.Artist> res) {
+            if (mArtists.length==0) return;
+            // TODO: this loop is for testing only; replace
+            int idx = 0;
+            for (kaaes.spotify.webapi.android.models.Artist a : res) {
+                mArtists[idx] = new Artist(a.name, mArtists[idx].getImage());
+                ++idx;
+                if (idx==mArtists.length) {
+                    break;
+                }
+            }
+            mAdapter.notifyDataSetChanged();
+        }
+    }
     private static final Artist[] sMockArtists = makeMockArtists();
     private static Artist[] makeMockArtists() {
         final int w = 256;
