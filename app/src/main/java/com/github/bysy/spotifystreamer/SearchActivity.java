@@ -58,7 +58,16 @@ public class SearchActivity extends AppCompatActivity {
         et.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId != EditorInfo.IME_ACTION_SEARCH) return false;
+                // Handle Search action from soft keyboard and
+                // enter key down from hardware keyboard.
+                // Ignore all other actions.
+                // See also http://stackoverflow.com/questions/1489852/android-handle-enter-in-an-edittext
+                if (! ( (actionId == EditorInfo.IME_ACTION_SEARCH) ||
+                        (actionId == EditorInfo.IME_NULL &&
+                          event.getAction() == KeyEvent.ACTION_DOWN &&
+                          event.getKeyCode() == KeyEvent.KEYCODE_ENTER) )) {
+                    return false;
+                }
                 String searchStr = v.getText().toString();
                 if (searchStr.length() == 0) return true;
                 ArtistsSearcher search = new ArtistsSearcher();
