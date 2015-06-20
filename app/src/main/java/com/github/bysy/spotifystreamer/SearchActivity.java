@@ -22,14 +22,16 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Artist;
 
 
 public class SearchActivity extends AppCompatActivity {
-    private Artist[] mArtists;
+    private List<Artist> mArtists = new ArrayList<>();
     private ArtistAdapter mAdapter;
     static final String ARTIST_NAME = "artist_name";
 
@@ -38,8 +40,6 @@ public class SearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
-        // TODO: replace mock with live data
-        mArtists = sMockArtists;
         mAdapter = new ArtistAdapter(this, R.layout.single_artist, mArtists);
 
         ListView lv = (ListView) findViewById(R.id.artistListView);
@@ -50,7 +50,7 @@ public class SearchActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Artist x = (Artist) parent.getItemAtPosition(position);
                 Intent i = new Intent(getApplicationContext(), TopSongsActivity.class);
-                i.putExtra(ARTIST_NAME, x.getName());
+                i.putExtra(ARTIST_NAME, x.name);
                 startActivity(i);
             }
         });
@@ -102,50 +102,31 @@ public class SearchActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    class ArtistsSearcher extends AsyncTask<String, Void, List<kaaes.spotify.webapi.android.models.Artist> > {
+    class ArtistsSearcher extends AsyncTask<String, Void, List<Artist> > {
         @Override
-        protected List<kaaes.spotify.webapi.android.models.Artist>
+        protected List<Artist>
         doInBackground(String... strings) {
+            // TODO: handle network exceptions
             if (strings.length==0) return null;
             String searchStr = strings[0];
             SpotifyApi spotApi = new SpotifyApi();
             SpotifyService spot = spotApi.getService();
 
-            List<kaaes.spotify.webapi.android.models.Artist> res;
-            res = spot.searchArtists(searchStr).artists.items;
+            List<Artist> res = spot.searchArtists(searchStr).artists.items;
             return res;
         }
         @Override
-        protected void onPostExecute(List<kaaes.spotify.webapi.android.models.Artist> res) {
-            if (mArtists.length==0) return;
-            // TODO: this loop is for testing only; replace
-            int idx = 0;
-            for (kaaes.spotify.webapi.android.models.Artist a : res) {
-                mArtists[idx] = new Artist(a.name, mArtists[idx].getImage());
-                ++idx;
-                if (idx==mArtists.length) {
-                    break;
-                }
-            }
+        protected void onPostExecute(List<Artist> res) {
+            // TODO: notify user when we get no results
+            mArtists = res;
+            mAdapter.clear();
+            mAdapter.addAll(res);
             mAdapter.notifyDataSetChanged();
         }
     }
 
     private static final int[] MOCK_COLORS = {0xff4dd0e1, 0xfffff176, 0xffffa726,
             0xff4db6ac, 0xfff06292, 0xff90a4ae};
-    private static final String[] MOCK_NAMES = {"Abc artist", "Def singer-songwriter", "Ghi super-group",
-            "Jkl star", "Mno MC", "Pqr pop star"};
-
-    private static final Artist[] sMockArtists = makeMockArtists();
-    private static Artist[] makeMockArtists() {
-        final int len = Math.min(MOCK_COLORS.length, MOCK_NAMES.length);
-        Artist[] artists = new Artist[len];
-        for (int i = 0; i<len; ++i) {
-            Bitmap b = createMockBitmap(MOCK_COLORS[i]);
-            artists[i] = new Artist(MOCK_NAMES[i], b);
-        }
-        return artists;
-    }
 
     private static Bitmap createMockBitmap(int color) {
         final int w = 256;
@@ -157,13 +138,11 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     class ArtistAdapter extends ArrayAdapter<Artist> {
-        private Artist[] mArtists;
         private final int mResource;
 
-        ArtistAdapter(Context context, int resource, Artist[] artists) {
+        ArtistAdapter(Context context, int resource, List<Artist> artists) {
             super(context, resource, artists);
             mResource = resource;
-            mArtists = artists;
         }
 
         @Override
@@ -175,25 +154,13 @@ public class SearchActivity extends AppCompatActivity {
             }
             Artist artist = getItem(position);
             TextView tv = (TextView) item.findViewById(R.id.artistNameView);
-            tv.setText(artist.getName());
+            tv.setText(artist.name);
             ImageView iv = (ImageView) item.findViewById(R.id.artistImageView);
-            iv.setImageBitmap(artist.getImage());
+            // TODO: use Picasso to retrieve live artist images
+            Bitmap b = createMockBitmap(MOCK_COLORS[position % MOCK_COLORS.length]);
+            iv.setImageBitmap(b);
             return item;
         }
 
     }
-}
-
-class Artist {
-    private final String name;
-    private final Bitmap image;
-
-    public Artist(String name, Bitmap image) {
-        this.name = name;
-        this.image = image;
-    }
-
-    String getName() { return name; }
-    Bitmap getImage() { return image; }
-
 }
