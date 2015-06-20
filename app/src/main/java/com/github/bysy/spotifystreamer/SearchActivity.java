@@ -138,7 +138,9 @@ public class SearchActivity extends AppCompatActivity {
                 showToast("Couldn't connect to Spotify");
                 return;
             }
-            // TODO: notify user when we get no results
+            if (res.isEmpty()) {
+                showToast("Sorry, no artists found with that name");
+            }
             mArtists = res;
             mAdapter.clear();
             mAdapter.addAll(res);
