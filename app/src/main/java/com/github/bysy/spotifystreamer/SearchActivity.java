@@ -138,17 +138,22 @@ public class SearchActivity extends AppCompatActivity {
 
     private static final Artist[] sMockArtists = makeMockArtists();
     private static Artist[] makeMockArtists() {
-        final int w = 256;
-        final int h = 256;
-        final Bitmap.Config c = Bitmap.Config.ARGB_8888;
         final int len = Math.min(MOCK_COLORS.length, MOCK_NAMES.length);
         Artist[] artists = new Artist[len];
         for (int i = 0; i<len; ++i) {
-            Bitmap b = Bitmap.createBitmap(w, h, c);
-            b.eraseColor(MOCK_COLORS[i]);
+            Bitmap b = createMockBitmap(MOCK_COLORS[i]);
             artists[i] = new Artist(MOCK_NAMES[i], b);
         }
         return artists;
+    }
+
+    private static Bitmap createMockBitmap(int color) {
+        final int w = 256;
+        final int h = 256;
+        final Bitmap.Config config = Bitmap.Config.ARGB_8888;
+        Bitmap b = Bitmap.createBitmap(w, h, config);
+        b.eraseColor(color);
+        return b;
     }
 
     class ArtistAdapter extends ArrayAdapter<Artist> {
