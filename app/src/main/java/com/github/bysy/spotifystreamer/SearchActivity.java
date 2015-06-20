@@ -130,21 +130,23 @@ public class SearchActivity extends AppCompatActivity {
             mAdapter.notifyDataSetChanged();
         }
     }
+
+    private static final int[] MOCK_COLORS = {0xff4dd0e1, 0xfffff176, 0xffffa726,
+            0xff4db6ac, 0xfff06292, 0xff90a4ae};
+    private static final String[] MOCK_NAMES = {"Abc artist", "Def singer-songwriter", "Ghi super-group",
+            "Jkl star", "Mno MC", "Pqr pop star"};
+
     private static final Artist[] sMockArtists = makeMockArtists();
     private static Artist[] makeMockArtists() {
         final int w = 256;
         final int h = 256;
         final Bitmap.Config c = Bitmap.Config.ARGB_8888;
-        final int[] colors = {0xff4dd0e1, 0xfffff176, 0xffffa726,
-                              0xff4db6ac, 0xfff06292, 0xff90a4ae};
-        final String[] names = {"Abc artist", "Def singer-songwriter", "Ghi super-group",
-                                "Jkl star", "Mno MC", "Pqr pop star"};
-        final int len = Math.min(colors.length, names.length);
+        final int len = Math.min(MOCK_COLORS.length, MOCK_NAMES.length);
         Artist[] artists = new Artist[len];
         for (int i = 0; i<len; ++i) {
             Bitmap b = Bitmap.createBitmap(w, h, c);
-            b.eraseColor(colors[i]);
-            artists[i] = new Artist(names[i], b);
+            b.eraseColor(MOCK_COLORS[i]);
+            artists[i] = new Artist(MOCK_NAMES[i], b);
         }
         return artists;
     }
