@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -31,6 +32,7 @@ import java.util.List;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
+import retrofit.RetrofitError;
 
 
 public class SearchActivity extends AppCompatActivity {
@@ -118,23 +120,34 @@ public class SearchActivity extends AppCompatActivity {
         @Override
         protected List<Artist>
         doInBackground(String... strings) {
-            // TODO: handle network exceptions
-            if (strings.length==0) return null;
-            String searchStr = strings[0];
-            SpotifyApi spotApi = new SpotifyApi();
-            SpotifyService spot = spotApi.getService();
+            try {
+                if (strings.length == 0) return null;
+                String searchStr = strings[0];
+                SpotifyApi spotApi = new SpotifyApi();
+                SpotifyService spot = spotApi.getService();
 
-            List<Artist> res = spot.searchArtists(searchStr).artists.items;
-            return res;
+                List<Artist> res = spot.searchArtists(searchStr).artists.items;
+                return res;
+            } catch (RetrofitError e) {
+                return null;
+            }
         }
         @Override
         protected void onPostExecute(List<Artist> res) {
+            if (res==null) {
+                showToast("Couldn't connect to Spotify");
+                return;
+            }
             // TODO: notify user when we get no results
             mArtists = res;
             mAdapter.clear();
             mAdapter.addAll(res);
             mAdapter.notifyDataSetChanged();
         }
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
     }
 
     private static final int[] MOCK_COLORS = {0xff4dd0e1, 0xfffff176, 0xffffa726,
