@@ -3,10 +3,11 @@ package com.github.bysy.spotifystreamer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,6 +22,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -137,14 +140,6 @@ public class SearchActivity extends AppCompatActivity {
     private static final int[] MOCK_COLORS = {0xff4dd0e1, 0xfffff176, 0xffffa726,
             0xff4db6ac, 0xfff06292, 0xff90a4ae};
 
-    private static Bitmap createMockBitmap(int color) {
-        final int w = 256;
-        final int h = 256;
-        final Bitmap.Config config = Bitmap.Config.ARGB_8888;
-        Bitmap b = Bitmap.createBitmap(w, h, config);
-        b.eraseColor(color);
-        return b;
-    }
 
     class ArtistAdapter extends ArrayAdapter<Artist> {
         private final int mResource;
@@ -165,11 +160,22 @@ public class SearchActivity extends AppCompatActivity {
             TextView tv = (TextView) item.findViewById(R.id.artistNameView);
             tv.setText(artist.name);
             ImageView iv = (ImageView) item.findViewById(R.id.artistImageView);
-            // TODO: use Picasso to retrieve live artist images
-            Bitmap b = createMockBitmap(MOCK_COLORS[position % MOCK_COLORS.length]);
-            iv.setImageBitmap(b);
+            iv.setBackgroundColor(MOCK_COLORS[position % MOCK_COLORS.length]);
+            String imageUrl = getImageUrl(artist);
+            if (imageUrl!=null) {
+                Picasso.with(SearchActivity.this).load(imageUrl).into(iv);
+            }
             return item;
         }
 
+    }
+
+    @Nullable
+    private static String getImageUrl(Artist artist) {
+        if (artist.images.isEmpty()) return null;
+        String url = artist.images.get(0).url;
+        // http://stackoverflow.com/questions/5617749/how-to-validate-a-url-website-name-in-edittext-in-android
+        if (!Patterns.WEB_URL.matcher(url).matches()) return null;
+        return url;
     }
 }
