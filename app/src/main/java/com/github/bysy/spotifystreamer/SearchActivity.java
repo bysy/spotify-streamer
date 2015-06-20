@@ -125,13 +125,13 @@ public class SearchActivity extends AppCompatActivity {
                 String searchStr = strings[0];
                 SpotifyApi spotApi = new SpotifyApi();
                 SpotifyService spot = spotApi.getService();
+                return spot.searchArtists(searchStr).artists.items;
 
-                List<Artist> res = spot.searchArtists(searchStr).artists.items;
-                return res;
             } catch (RetrofitError e) {
                 return null;
             }
         }
+
         @Override
         protected void onPostExecute(List<Artist> res) {
             if (res==null) {
@@ -182,7 +182,6 @@ public class SearchActivity extends AppCompatActivity {
             }
             return item;
         }
-
     }
 
     @Nullable
