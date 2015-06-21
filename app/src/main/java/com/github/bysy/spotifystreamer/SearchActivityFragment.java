@@ -59,6 +59,7 @@ public class SearchActivityFragment extends Fragment {
                 Artist x = (Artist) parent.getItemAtPosition(position);
                 Intent i = new Intent(getActivity(), TopSongsActivity.class);
                 i.putExtra(SearchActivity.ARTIST_NAME, x.name);
+                i.putExtra(SearchActivity.ARTIST_ID, x.id);
                 startActivity(i);
             }
         });

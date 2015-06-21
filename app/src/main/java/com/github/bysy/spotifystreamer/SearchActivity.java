@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 public class SearchActivity extends AppCompatActivity {
     static final String ARTIST_NAME = "artist_name";
+    static final String ARTIST_ID = "artist_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
