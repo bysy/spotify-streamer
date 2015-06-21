@@ -10,12 +10,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import kaaes.spotify.webapi.android.models.Track;
+
 
 /**
  * Fragment to show the top songs of an artist.
  */
 public class TopSongsActivityFragment extends Fragment {
     SongsAdapter mAdapter = null;
+    List<Track> mSongs = new ArrayList<>();
 
     public TopSongsActivityFragment() {
     }
@@ -23,8 +29,7 @@ public class TopSongsActivityFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Song[] songs = sMockSongs;
-        mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, songs);
+        mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
     }
 
     @Override
@@ -37,19 +42,10 @@ public class TopSongsActivityFragment extends Fragment {
     }
 
 
-    static private final Song[] sMockSongs = makeMockSongs();
-    private static Song[] makeMockSongs() {
-        return new Song[]{new Song("Great Song", "Sweet Album"),
-                new Song("Splendiferous Song", "Sweet Album"),
-                new Song("OK Song", "Second Album"),
-                new Song("More of the Same", "Third Album"),
-                new Song("'Tis What We Do", "Sweet Album")};
-    }
-
-    class SongsAdapter extends ArrayAdapter<Song> {
+    class SongsAdapter extends ArrayAdapter<Track> {
         private final int mResource;
 
-        SongsAdapter(Context context, int resource, Song[] songs) {
+        SongsAdapter(Context context, int resource, List<Track> songs) {
             super(context, resource, songs);
             mResource = resource;
         }
@@ -61,23 +57,12 @@ public class TopSongsActivityFragment extends Fragment {
                 LayoutInflater li = getActivity().getLayoutInflater();
                 item = li.inflate(mResource, parent, false);
             }
-            Song song = getItem(position);
+            Track song = getItem(position);
             TextView tv = (TextView) item.findViewById(R.id.songNameView);
             tv.setText(song.name);
             tv = (TextView) item.findViewById(R.id.albumNameView);
-            tv.setText(song.album);
+            tv.setText(song.album.name);
             return item;
         }
-    }
-}
-
-
-class Song {
-    public final String name;
-    public final String album;
-
-    Song (String name, String album) {
-        this.name = name;
-        this.album = album;
     }
 }
