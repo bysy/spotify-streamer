@@ -60,16 +60,9 @@ public class TopSongsActivityFragment extends Fragment {
         spot.getArtistTopTrack(id, options, new Callback<Tracks>() {
             @Override
             public void success(final Tracks tracks, Response response) {
-                // Documentation suggests the callback runs on the UI thread but
-                // in practice it runs on the Retrofit idle thread.
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSongs = tracks.tracks;
-                        mAdapter.clear();
-                        mAdapter.addAll(mSongs);
-                    }
-                });
+                mSongs = tracks.tracks;
+                mAdapter.clear();
+                mAdapter.addAll(mSongs);
             }
             @Override
             public void failure(RetrofitError error) {
