@@ -28,10 +28,9 @@ public class TopSongsActivity extends AppCompatActivity {
             finish();
         }
         ActionBar ab = getSupportActionBar();
-        if (ab==null) {
-            return;
+        if (ab!=null) {
+            ab.setTitle(name);
         }
-        ab.setTitle(name);
         Song[] songs = sMockSongs;
         SongsAdapter adapter = new SongsAdapter(this, R.layout.song_list_item, songs);
         ListView lv = (ListView) findViewById(R.id.songsListView);
