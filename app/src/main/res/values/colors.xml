@@ -4,4 +4,6 @@
     <color name="primary_dark">#000001</color>
     <color name="accent">#9770fe</color>
     <color name="window_background">#263238</color>
+    <color name="loading">@color/accent</color>
+    <color name="unavailable">@color/material_blue_grey_950</color>
 </resources>

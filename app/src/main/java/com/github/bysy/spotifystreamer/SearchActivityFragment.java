@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,8 +20,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +32,7 @@ import retrofit.RetrofitError;
 /**
  * Fragment to search for and display artists.
  */
-public class SearchActivityFragment extends Fragment {
+public class SearchActivityFragment extends ImageListViewFragment {
     private List<Artist> mArtists = new ArrayList<>();
     private ArtistAdapter mAdapter;
 
@@ -180,9 +177,7 @@ public class SearchActivityFragment extends Fragment {
             tv.setText(artist.name);
             ImageView iv = (ImageView) item.findViewById(R.id.artistImageView);
             String imageUrl = Util.getImageUrl(artist.images);
-            if (imageUrl!=null) {
-                Picasso.with(getActivity()).load(imageUrl).into(iv);
-            }
+            loadImageInto(imageUrl, iv);
             return item;
         }
     }

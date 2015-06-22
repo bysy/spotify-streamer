@@ -1,0 +1,29 @@
+package com.github.bysy.spotifystreamer;
+
+import android.app.Fragment;
+import android.content.Context;
+import android.support.annotation.Nullable;
+import android.widget.ImageView;
+
+import com.squareup.picasso.Picasso;
+
+/**
+ * Help with safe image loading into ListView items.
+ */
+public class ImageListViewFragment extends Fragment {
+    /** Load image at imageUrl into imageView and set background color appropriately. */
+    void loadImageInto(@Nullable String imageUrl, ImageView imageView) {
+        final int loadingColorId = getResources().getColor(R.color.loading);
+        final int unavailableColorId = getResources().getColor(R.color.unavailable);
+        final int questionMarkId = android.R.drawable.ic_menu_help;
+        final Context context = getActivity();
+
+        if (imageUrl!=null) {
+            imageView.setBackgroundColor(loadingColorId);
+            Picasso.with(context).load(imageUrl).error(unavailableColorId).into(imageView);
+        } else {
+            imageView.setBackgroundColor(unavailableColorId);
+            Picasso.with(context).load(questionMarkId).into(imageView);
+        }
+    }
+}

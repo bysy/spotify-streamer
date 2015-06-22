@@ -3,7 +3,6 @@ package com.github.bysy.spotifystreamer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,8 +11,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +30,7 @@ import retrofit.client.Response;
 /**
  * Fragment to show the top songs of an artist.
  */
-public class TopSongsActivityFragment extends Fragment {
+public class TopSongsActivityFragment extends ImageListViewFragment {
     SongsAdapter mAdapter = null;
     List<Track> mSongs = new ArrayList<>();
 
@@ -105,9 +102,7 @@ public class TopSongsActivityFragment extends Fragment {
             tv.setText(song.album.name);
             ImageView iv = (ImageView) item.findViewById(R.id.albumImageView);
             String imageUrl = Util.getImageUrl(song.album.images);
-            if (imageUrl!=null) {
-                Picasso.with(getActivity()).load(imageUrl).into(iv);
-            }
+            loadImageInto(imageUrl, iv);
             return item;
         }
     }
