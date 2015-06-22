@@ -149,6 +149,8 @@ public class SearchActivityFragment extends ImageListViewFragment {
             mArtists = res;
             mAdapter.clear();
             mAdapter.addAll(res);
+            ListView lv = (ListView) getActivity().findViewById(R.id.artistListView);
+            lv.setSelectionAfterHeaderView();
 
             // Workaround for ease of use with hardware keyboard
             getActivity().findViewById(R.id.artistListView).requestFocus();
