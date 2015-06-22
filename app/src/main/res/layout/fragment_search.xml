@@ -6,6 +6,17 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="0dp" tools:context=".SearchActivityFragment">
 
+    <!-- Dummy to remove focus from EditText without having to mess with EditText's focusability.
+        In testing, this approach gave better usability and accessibility compared to others
+        that I've tried. Also see comments at SearchActivityFragment.disableInput(). -->
+    <LinearLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:id="@+id/dummyView"
+        android:layout_width="0px"
+        android:layout_height="0px"
+        android:orientation="horizontal" />
+
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

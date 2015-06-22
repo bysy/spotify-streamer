@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -82,17 +81,9 @@ public class SearchActivityFragment extends ImageListViewFragment {
                 }
                 String searchStr = v.getText().toString();
                 if (searchStr.length() == 0) return true;
+                disableInput();
                 runSearch(searchStr);
-                hideKeyboard();
-                disableInput(et);
                 return true;
-            }
-        });
-        et.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent e) {
-                enableInput(et);
-                return false;
             }
         });
         return view;
@@ -107,6 +98,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
                 mArtists = pager.artists.items;
                 if (mArtists.isEmpty()) {
                     Util.showToast(getActivity(), "Sorry, no artists found with that name");
+                    enableInput();
                 }
                 mAdapter.clear();
                 mAdapter.addAll(mArtists);
@@ -121,30 +113,27 @@ public class SearchActivityFragment extends ImageListViewFragment {
                 Util.showToast(getActivity(), "Couldn't connect to Spotify");
             }
         });
+
     }
 
-    // These methods provide one way to turn off/on the cursor that works even
-    // with orientation changes or app switching.
-    // Source: discussion on multiple SO pages, docs.
+    private void disableInput() {
+        // Change focus away from EditText to hide cursor and highlighting.
+        // See also http://stackoverflow.com/questions/1555109/stop-edittext-from-gaining-focus-at-activity-startup
+        getActivity().findViewById(R.id.searchText).clearFocus();
 
-    static private void disableInput(EditText editTextView) {
-        editTextView.setFocusableInTouchMode(false);
-        editTextView.setFocusable(false);
-    }
-
-    static private void enableInput(EditText editTextView) {
-        editTextView.setFocusableInTouchMode(true);
-        editTextView.setFocusable(true);
-    }
-
-    private void hideKeyboard() {
-        // This is tricky. There are many ways that work but this one fits
-        // nicely here. And yes, it actually hides the keyboard instead of
-        // just toggling it.
+        // Hide keyboard when it's visible. This is tricky.
         // Thanks to http://stackoverflow.com/a/15587937
         InputMethodManager imm = (InputMethodManager)
                 getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
+    }
+
+    private void enableInput() {
+        EditText et = (EditText) getActivity().findViewById(R.id.searchText);
+        et.requestFocus();
+        InputMethodManager imm = (InputMethodManager)
+                getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
     }
 
 
