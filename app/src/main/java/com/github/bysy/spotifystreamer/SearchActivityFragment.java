@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -21,7 +20,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -145,11 +143,11 @@ public class SearchActivityFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Artist> res) {
             if (res==null) {
-                showToast("Couldn't connect to Spotify");
+                Util.showToast(getActivity(), "Couldn't connect to Spotify");
                 return;
             }
             if (res.isEmpty()) {
-                showToast("Sorry, no artists found with that name");
+                Util.showToast(getActivity(), "Sorry, no artists found with that name");
             }
             mArtists = res;
             mAdapter.clear();
@@ -161,9 +159,6 @@ public class SearchActivityFragment extends Fragment {
         }
     }
 
-    private void showToast(String message) {
-        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-    }
 
     private static final int[] MOCK_COLORS = {0xff4dd0e1, 0xfffff176, 0xffffa726,
             0xff4db6ac, 0xfff06292, 0xff90a4ae};
@@ -189,20 +184,11 @@ public class SearchActivityFragment extends Fragment {
             tv.setText(artist.name);
             ImageView iv = (ImageView) item.findViewById(R.id.artistImageView);
             iv.setBackgroundColor(MOCK_COLORS[position % MOCK_COLORS.length]);
-            String imageUrl = getImageUrl(artist);
+            String imageUrl = Util.getImageUrl(artist.images);
             if (imageUrl!=null) {
                 Picasso.with(getActivity()).load(imageUrl).into(iv);
             }
             return item;
         }
-    }
-
-    @Nullable
-    private static String getImageUrl(Artist artist) {
-        if (artist.images.isEmpty()) return null;
-        String url = artist.images.get(0).url;
-        // http://stackoverflow.com/questions/5617749/how-to-validate-a-url-website-name-in-edittext-in-android
-        if (!Patterns.WEB_URL.matcher(url).matches()) return null;
-        return url;
     }
 }

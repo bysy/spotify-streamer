@@ -3,10 +3,8 @@ package com.github.bysy.spotifystreamer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -102,21 +100,11 @@ public class TopSongsActivityFragment extends Fragment {
             tv = (TextView) item.findViewById(R.id.albumNameView);
             tv.setText(song.album.name);
             ImageView iv = (ImageView) item.findViewById(R.id.albumImageView);
-            String imageUrl = getImageUrl(song);
+            String imageUrl = Util.getImageUrl(song.album.images);
             if (imageUrl!=null) {
                 Picasso.with(getActivity()).load(imageUrl).into(iv);
             }
             return item;
         }
-    }
-
-    // TODO: remove duplication
-    @Nullable
-    private static String getImageUrl(Track song) {
-        if (song.album.images.isEmpty()) return null;
-        String url = song.album.images.get(0).url;
-        // http://stackoverflow.com/questions/5617749/how-to-validate-a-url-website-name-in-edittext-in-android
-        if (!Patterns.WEB_URL.matcher(url).matches()) return null;
-        return url;
     }
 }
