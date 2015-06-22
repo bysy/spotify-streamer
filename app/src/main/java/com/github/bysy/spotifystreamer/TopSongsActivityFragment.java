@@ -59,12 +59,16 @@ public class TopSongsActivityFragment extends Fragment {
             @Override
             public void success(final Tracks tracks, Response response) {
                 mSongs = tracks.tracks;
+                if (mSongs.isEmpty()) {
+                    Util.showToast(getActivity(), "No songs available for selected artist.");
+                }
                 mAdapter.clear();
                 mAdapter.addAll(mSongs);
             }
             @Override
             public void failure(RetrofitError error) {
                 Log.d("BysySpot", "Top tracks failure: ".concat(error.toString()));
+                Util.showToast(getActivity(), "Couldn't connect to Spotify");
             }
         });
     }
