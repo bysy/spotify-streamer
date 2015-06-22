@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.util.Patterns;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -68,7 +69,7 @@ public class SearchActivityFragment extends Fragment {
                 startActivity(i);
             }
         });
-        EditText et = (EditText) view.findViewById(R.id.searchText);
+        final EditText et = (EditText) view.findViewById(R.id.searchText);
         et.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -87,11 +88,32 @@ public class SearchActivityFragment extends Fragment {
                 ArtistsSearcher search = new ArtistsSearcher();
                 search.execute(searchStr);
                 hideKeyboard();
+                disableInput(et);
                 return true;
             }
         });
-
+        et.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent e) {
+                enableInput(et);
+                return false;
+            }
+        });
         return view;
+    }
+
+    // These methods provide one way to turn off/on the cursor that works even
+    // with orientation changes or app switching.
+    // Source: discussion on multiple SO pages, docs.
+
+    static private void disableInput(EditText editTextView) {
+        editTextView.setFocusableInTouchMode(false);
+        editTextView.setFocusable(false);
+    }
+
+    static private void enableInput(EditText editTextView) {
+        editTextView.setFocusableInTouchMode(true);
+        editTextView.setFocusable(true);
     }
 
     private void hideKeyboard() {
@@ -133,6 +155,9 @@ public class SearchActivityFragment extends Fragment {
             mAdapter.clear();
             mAdapter.addAll(res);
             mAdapter.notifyDataSetChanged();
+
+            // Workaround for ease of use with hardware keyboard
+            getActivity().findViewById(R.id.artistListView).requestFocus();
         }
     }
 
