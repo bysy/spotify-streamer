@@ -160,10 +160,6 @@ public class SearchActivityFragment extends Fragment {
     }
 
 
-    private static final int[] MOCK_COLORS = {0xff4dd0e1, 0xfffff176, 0xffffa726,
-            0xff4db6ac, 0xfff06292, 0xff90a4ae};
-
-
     class ArtistAdapter extends ArrayAdapter<Artist> {
         private final int mResource;
 
@@ -183,7 +179,6 @@ public class SearchActivityFragment extends Fragment {
             TextView tv = (TextView) item.findViewById(R.id.artistNameView);
             tv.setText(artist.name);
             ImageView iv = (ImageView) item.findViewById(R.id.artistImageView);
-            iv.setBackgroundColor(MOCK_COLORS[position % MOCK_COLORS.length]);
             String imageUrl = Util.getImageUrl(artist.images);
             if (imageUrl!=null) {
                 Picasso.with(getActivity()).load(imageUrl).into(iv);
