@@ -40,6 +40,7 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
         Intent in = getActivity().getIntent();
         String id = in.getStringExtra(SearchActivity.ARTIST_ID);
