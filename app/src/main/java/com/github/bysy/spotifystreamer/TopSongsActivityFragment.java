@@ -31,6 +31,7 @@ import retrofit.client.Response;
  * Fragment to show the top songs of an artist.
  */
 public class TopSongsActivityFragment extends ImageListViewFragment {
+    static private String TAG = "BysySpot";
     SongsAdapter mAdapter = null;
     List<Track> mSongs = new ArrayList<>();
 
@@ -45,14 +46,14 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
         Intent in = getActivity().getIntent();
         String id = in.getStringExtra(SearchActivity.ARTIST_ID);
         if (id==null) {
-            Log.d("BysySpot", "id is null");
+            Log.d(TAG, "id is null");
         } else {
-            Log.d("BysySpot", "Searching for ID: ".concat(id));
+            Log.d(TAG, "Searching for ID: ".concat(id));
         }
         SpotifyApi spotApi = new SpotifyApi();
         SpotifyService spot = spotApi.getService();
         final String country = Util.getCountryCode();
-        Log.d("BysySpot", "Country is ".concat(country));
+        Log.d(TAG, "Country is ".concat(country));
         Map<String,Object> options = new HashMap<>();
         options.put("country", country);
         spot.getArtistTopTrack(id, options, new Callback<Tracks>() {
@@ -67,7 +68,7 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
             }
             @Override
             public void failure(RetrofitError error) {
-                Log.d("BysySpot", "Top tracks failure: ".concat(error.toString()));
+                Log.d(TAG, "Top tracks failure: ".concat(error.toString()));
                 Util.showToast(getActivity(), "Couldn't connect to Spotify");
             }
         });
