@@ -51,8 +51,10 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
         }
         SpotifyApi spotApi = new SpotifyApi();
         SpotifyService spot = spotApi.getService();
+        final String country = Util.getCountryCode();
+        Log.d("BysySpot", "Country is ".concat(country));
         Map<String,Object> options = new HashMap<>();
-        options.put("country", "US");
+        options.put("country", country);
         spot.getArtistTopTrack(id, options, new Callback<Tracks>() {
             @Override
             public void success(final Tracks tracks, Response response) {
