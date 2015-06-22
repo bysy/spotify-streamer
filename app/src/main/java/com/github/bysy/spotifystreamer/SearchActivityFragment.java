@@ -44,11 +44,16 @@ public class SearchActivityFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+        mAdapter = new ArtistAdapter(getActivity(), R.layout.single_artist, mArtists);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
-
-        mAdapter = new ArtistAdapter(getActivity(), R.layout.single_artist, mArtists);
 
         ListView lv = (ListView) view.findViewById(R.id.artistListView);
         lv.setAdapter(mAdapter);
