@@ -3,7 +3,6 @@ package com.github.bysy.spotifystreamer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.KeyEvent;
@@ -26,7 +25,10 @@ import java.util.List;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
+import kaaes.spotify.webapi.android.models.ArtistsPager;
+import retrofit.Callback;
 import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 /**
@@ -80,8 +82,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
                 }
                 String searchStr = v.getText().toString();
                 if (searchStr.length() == 0) return true;
-                ArtistsSearcher search = new ArtistsSearcher();
-                search.execute(searchStr);
+                runSearch(searchStr);
                 hideKeyboard();
                 disableInput(et);
                 return true;
@@ -95,6 +96,31 @@ public class SearchActivityFragment extends ImageListViewFragment {
             }
         });
         return view;
+    }
+
+    private void runSearch(String searchStr) {
+        SpotifyApi spotApi = new SpotifyApi();
+        SpotifyService spot = spotApi.getService();
+        spot.searchArtists(searchStr, new Callback<ArtistsPager>() {
+            @Override
+            public void success(final ArtistsPager pager, Response response) {
+                mArtists = pager.artists.items;
+                if (mArtists.isEmpty()) {
+                    Util.showToast(getActivity(), "Sorry, no artists found with that name");
+                }
+                mAdapter.clear();
+                mAdapter.addAll(mArtists);
+                ListView lv = (ListView) getActivity().findViewById(R.id.artistListView);
+                lv.setSelectionAfterHeaderView();
+
+                // Workaround for ease of use with hardware keyboard
+                getActivity().findViewById(R.id.artistListView).requestFocus();
+            }
+            @Override
+            public void failure(RetrofitError error) {
+                Util.showToast(getActivity(), "Couldn't connect to Spotify");
+            }
+        });
     }
 
     // These methods provide one way to turn off/on the cursor that works even
@@ -119,42 +145,6 @@ public class SearchActivityFragment extends ImageListViewFragment {
         InputMethodManager imm = (InputMethodManager)
                 getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
-    }
-
-    class ArtistsSearcher extends AsyncTask<String, Void, List<Artist> > {
-        @Override
-        protected List<Artist>
-        doInBackground(String... strings) {
-            try {
-                if (strings.length == 0) return null;
-                String searchStr = strings[0];
-                SpotifyApi spotApi = new SpotifyApi();
-                SpotifyService spot = spotApi.getService();
-                return spot.searchArtists(searchStr).artists.items;
-
-            } catch (RetrofitError e) {
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Artist> res) {
-            if (res==null) {
-                Util.showToast(getActivity(), "Couldn't connect to Spotify");
-                return;
-            }
-            if (res.isEmpty()) {
-                Util.showToast(getActivity(), "Sorry, no artists found with that name");
-            }
-            mArtists = res;
-            mAdapter.clear();
-            mAdapter.addAll(res);
-            ListView lv = (ListView) getActivity().findViewById(R.id.artistListView);
-            lv.setSelectionAfterHeaderView();
-
-            // Workaround for ease of use with hardware keyboard
-            getActivity().findViewById(R.id.artistListView).requestFocus();
-        }
     }
 
 
