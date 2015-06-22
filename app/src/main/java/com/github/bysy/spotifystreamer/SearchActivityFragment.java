@@ -149,7 +149,6 @@ public class SearchActivityFragment extends ImageListViewFragment {
             mArtists = res;
             mAdapter.clear();
             mAdapter.addAll(res);
-            mAdapter.notifyDataSetChanged();
 
             // Workaround for ease of use with hardware keyboard
             getActivity().findViewById(R.id.artistListView).requestFocus();
