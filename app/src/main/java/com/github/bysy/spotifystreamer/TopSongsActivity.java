@@ -16,8 +16,8 @@ public class TopSongsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_top_songs);
         Intent in = getIntent();
         String name = in.getStringExtra(SearchActivity.ARTIST_NAME);
-        if (name==null) {
-            // TODO: handling of missing name should be more user-friendly
+        if (name==null || name.isEmpty()) {
+            Util.showToast(this, "No artist's name supplied");
             finish();
         }
         ActionBar ab = getSupportActionBar();

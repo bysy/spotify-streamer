@@ -45,8 +45,10 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
         mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
         Intent in = getActivity().getIntent();
         String id = in.getStringExtra(SearchActivity.ARTIST_ID);
-        if (id==null) {
-            Log.d(TAG, "id is null");
+        if (id==null || id.isEmpty()) {
+            Log.d(TAG, SearchActivity.ARTIST_ID + " is missing");
+            getActivity().finish();
+            return;
         } else {
             Log.d(TAG, "Searching for ID: ".concat(id));
         }
