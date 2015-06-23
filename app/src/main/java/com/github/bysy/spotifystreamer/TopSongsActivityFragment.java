@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2015. bysy@users.noreply.github.com
+ */
+
 package com.github.bysy.spotifystreamer;
 
 import android.content.Context;

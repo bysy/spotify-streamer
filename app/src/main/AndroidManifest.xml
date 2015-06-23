@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015. bysy@users.noreply.github.com
+  -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.github.bysy.spotifystreamer" >
     <uses-permission android:name="android.permission.INTERNET"/>

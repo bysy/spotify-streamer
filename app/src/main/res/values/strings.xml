@@ -1,3 +1,7 @@
+<!--
+  ~ Copyright (c) 2015. bysy@users.noreply.github.com
+  -->
+
 <resources>
     <string name="app_name">Spotify Streamer</string>
     <string name="action_settings">Settings</string>
