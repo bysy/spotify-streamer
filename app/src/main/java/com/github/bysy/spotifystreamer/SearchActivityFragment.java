@@ -99,6 +99,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
         spot.searchArtists(searchStr, new Callback<ArtistsPager>() {
             @Override
             public void success(final ArtistsPager pager, Response response) {
+                // TODO: retain pager info and retrieve more artists when scrolling to bottom of list
                 mArtists = pager.artists.items;
                 if (mArtists.isEmpty()) {
                     Util.showToast(getActivity(), "Sorry, no artists found with that name");
