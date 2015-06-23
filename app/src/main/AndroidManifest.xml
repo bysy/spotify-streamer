@@ -19,7 +19,11 @@
         </activity>
         <activity
             android:name=".TopSongsActivity"
-            android:label="@string/title_activity_top_songs" >
+            android:label="@string/title_activity_top_songs"
+            android:parentActivityName=".SearchActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.github.bysy.spotifystreamer.SearchActivity" />
         </activity>
     </application>
 
