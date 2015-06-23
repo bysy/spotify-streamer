@@ -36,6 +36,7 @@ import retrofit.client.Response;
 public class SearchActivityFragment extends ImageListViewFragment {
     private List<Artist> mArtists = new ArrayList<>();
     private ArtistAdapter mAdapter;
+    private final SpotifyApi mSpotApi = new SpotifyApi();
 
     public SearchActivityFragment() {
     }
@@ -90,8 +91,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
     }
 
     private void runSearch(String searchStr) {
-        SpotifyApi spotApi = new SpotifyApi();
-        SpotifyService spot = spotApi.getService();
+        SpotifyService spot = mSpotApi.getService();
         spot.searchArtists(searchStr, new Callback<ArtistsPager>() {
             @Override
             public void success(final ArtistsPager pager, Response response) {
