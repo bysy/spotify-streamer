@@ -26,7 +26,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Song Name"
             android:id="@+id/songNameView"
             android:layout_gravity="center_vertical"
             android:clickable="false"
@@ -35,7 +34,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Album Name"
             android:id="@+id/albumNameView"
             android:layout_gravity="center_vertical"
             android:clickable="false"
