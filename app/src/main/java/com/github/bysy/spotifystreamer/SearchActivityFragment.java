@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,9 +39,12 @@ import retrofit.client.Response;
  * Fragment to search for and display artists.
  */
 public class SearchActivityFragment extends ImageListViewFragment {
+    private static final String SHOULD_SEARCH = "should_search";
+    private static String SEARCH_TEXT = "search_text";
     private List<Artist> mArtists = new ArrayList<>();
     private ArtistAdapter mAdapter;
     private final SpotifyApi mSpotApi = new SpotifyApi();
+    private String mLastSearch;
 
     public SearchActivityFragment() {
     }
@@ -50,6 +54,20 @@ public class SearchActivityFragment extends ImageListViewFragment {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         mAdapter = new ArtistAdapter(getActivity(), R.layout.single_artist, mArtists);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SHOULD_SEARCH, false);
+        EditText et = (EditText) getActivity().findViewById(R.id.searchText);
+        if (et==null) { return; }
+        String search = et.getText().toString();
+        if (search.isEmpty()) { return; }
+        outState.putString(SEARCH_TEXT, search);
+        if (search.equals(mLastSearch)) {
+            outState.putBoolean(SHOULD_SEARCH, true);
+        }
     }
 
     @Override
@@ -91,10 +109,24 @@ public class SearchActivityFragment extends ImageListViewFragment {
                 return true;
             }
         });
+        // Restore state
+        if (savedInstanceState!=null) {
+            String searchStr = savedInstanceState.getString(SEARCH_TEXT);
+            if (searchStr!=null) {
+                Log.d("BysySpot", "restoring from saved state");
+                et.setText(searchStr);
+                boolean doSearch = savedInstanceState.getBoolean(SHOULD_SEARCH);
+                if (doSearch) {
+                    runSearch(searchStr);
+                }
+            }
+        }
         return view;
     }
 
     private void runSearch(String searchStr) {
+        Log.d("BysySpot", "searching for " + searchStr);
+        mLastSearch = searchStr;
         SpotifyService spot = mSpotApi.getService();
         spot.searchArtists(searchStr, new Callback<ArtistsPager>() {
             @Override
