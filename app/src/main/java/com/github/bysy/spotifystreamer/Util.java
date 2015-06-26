@@ -38,21 +38,12 @@ class Util {
         return url;
     }
 
-    // Return the smallest non-tiny image.
-    // Return first image if all images are tiny.
+    // Return the smallest usable image.
     static Image findSmallImage(List<Image> images) {
-        Iterator<Image> itr = images.iterator();
-        Image best = itr.next();
-        int bestSize = best.height * best.width;
-        final int minimum = 32*32;
-        for (Image i = itr.next(); itr.hasNext(); i = itr.next()) {
-            int iSize = i.height * i.width;
-            if (iSize<bestSize && iSize>=minimum ) {
-                bestSize = iSize;
-                best = i;
-            }
-        }
-        return best;
+        // NOTE: Spotify's docs say the first image is always the widest but don't specify any
+        // further ordering. But in practice, they're sorted by size and the last image is still
+        // plenty big enough.
+        return images.get(images.size()-1);
     }
 
     static void showToast(Context context, String message) {
