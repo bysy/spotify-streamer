@@ -25,7 +25,7 @@ public class ImageListViewFragment extends Fragment {
         if (imageUrl!=null) {
             imageView.setBackgroundColor(loadingColorId);
             Picasso.with(context)
-                    .load(imageUrl).centerCrop().resize(256,256)
+                    .load(imageUrl).centerCrop().resize(128,128).onlyScaleDown()
                     .error(unavailableColorId).into(imageView);
         } else {
             imageView.setBackgroundColor(unavailableColorId);
