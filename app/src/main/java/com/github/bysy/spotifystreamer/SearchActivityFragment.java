@@ -150,7 +150,6 @@ public class SearchActivityFragment extends ImageListViewFragment {
                 Util.showToast(getActivity(), "Couldn't connect to Spotify");
             }
         });
-
     }
 
     private void disableInput() {
