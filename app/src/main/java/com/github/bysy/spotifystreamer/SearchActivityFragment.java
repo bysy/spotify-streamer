@@ -24,7 +24,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -45,6 +47,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
     private ArtistAdapter mAdapter;
     private final SpotifyApi mSpotApi = new SpotifyApi();
     private String mLastSearch;
+    private int mLastTotal;
 
     public SearchActivityFragment() {
     }
@@ -131,7 +134,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
         spot.searchArtists(searchStr, new Callback<ArtistsPager>() {
             @Override
             public void success(final ArtistsPager pager, Response response) {
-                // TODO: retain pager info and retrieve more artists when scrolling to bottom of list
+                mLastTotal = pager.artists.total;
                 mArtists = pager.artists.items;
                 if (mArtists.isEmpty()) {
                     Util.showToast(getActivity(), "Sorry, no artists found with that name");
@@ -148,6 +151,29 @@ public class SearchActivityFragment extends ImageListViewFragment {
             @Override
             public void failure(RetrofitError error) {
                 Util.showToast(getActivity(), "Couldn't connect to Spotify");
+            }
+        });
+    }
+
+    private void retrieveMoreArtists() {
+        final int offset = mAdapter.getCount();
+        if (offset>=mLastTotal) {
+            return;
+        }
+        final String searchStr = mLastSearch;
+        Log.d("BysySpot", "searching for " + searchStr + " with offset " + offset);
+        SpotifyService spot = mSpotApi.getService();
+        Map<String,Object> options = new HashMap<>();
+        options.put("offset", Integer.toString(offset));
+        spot.searchArtists(searchStr, options, new Callback<ArtistsPager>() {
+            @Override
+            public void success(final ArtistsPager pager, Response response) {
+                List<Artist> newArtists = pager.artists.items;
+                mAdapter.addAll(newArtists);
+            }
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d("BysySpot", "Failed to retrieve additional artists");
             }
         });
     }
@@ -187,6 +213,10 @@ public class SearchActivityFragment extends ImageListViewFragment {
             if (item==null) {
                 LayoutInflater li = getActivity().getLayoutInflater();
                 item = li.inflate(mResource, parent, false);
+            }
+            if (position==(getCount()-1-5)) {  // 5 before last makes for smoother scrolling
+                Log.d("BysySpot", "retrieving more artists at position " + Integer.toString(position));
+                SearchActivityFragment.this.retrieveMoreArtists();
             }
             Artist artist = getItem(position);
             TextView tv = (TextView) item.findViewById(R.id.artistNameView);
