@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -35,6 +36,8 @@ import retrofit.client.Response;
  * Fragment to show the top songs of an artist.
  */
 public class TopSongsActivityFragment extends ImageListViewFragment {
+    private static final String SONG_ID = "SONG_ID";
+    private static final String SONG_NAME = "SONG_NAME";
     static private String TAG = "BysySpot";
     SongsAdapter mAdapter = null;
     List<Track> mSongs = new ArrayList<>();
@@ -86,6 +89,17 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
         View view = inflater.inflate(R.layout.fragment_top_songs, container, false);
         ListView lv = (ListView) view.findViewById(R.id.songsListView);
         lv.setAdapter(mAdapter);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Open player activity for this song
+                Track t = (Track) parent.getItemAtPosition(position);
+                Intent i = new Intent(getActivity(), PlayerActivity.class);
+                i.putExtra(SONG_ID, t.id);
+                i.putExtra(SONG_NAME, t.name);
+                startActivity(i);
+            }
+        });
         return view;
     }
 
