@@ -30,6 +30,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.github.bysy.spotifystreamer.SearchActivity" />
         </activity>
+        <activity
+            android:name=".PlayerActivity"
+            android:label="@string/title_activity_player"
+            android:parentActivityName=".TopSongsActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.github.bysy.spotifystreamer.TopSongsActivity" />
+        </activity>
     </application>
 
 </manifest>
