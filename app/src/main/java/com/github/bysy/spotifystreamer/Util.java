@@ -5,10 +5,14 @@
 package com.github.bysy.spotifystreamer;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Patterns;
+import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 import java.util.Locale;
@@ -49,5 +53,24 @@ class Util {
 
     static void showToast(Context context, String message) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+    }
+
+    /** Load image at imageUrl into imageView and set background color appropriately. */
+    static void loadImageInto(@NonNull Context context,
+                              @Nullable String imageUrl, @NonNull ImageView imageView) {
+        final Resources resources = context.getResources();
+        final int loadingColorId = resources.getColor(R.color.loading);
+        final int unavailableColorId = resources.getColor(R.color.unavailable);
+        final int questionMarkId = android.R.drawable.ic_menu_help;
+
+        if (imageUrl!=null) {
+            imageView.setBackgroundColor(loadingColorId);
+            Picasso.with(context)
+                    .load(imageUrl).centerCrop().resize(128,128).onlyScaleDown()
+                    .error(unavailableColorId).into(imageView);
+        } else {
+            imageView.setBackgroundColor(unavailableColorId);
+            Picasso.with(context).load(questionMarkId).into(imageView);
+        }
     }
 }

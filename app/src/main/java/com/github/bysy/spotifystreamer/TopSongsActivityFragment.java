@@ -4,6 +4,7 @@
 
 package com.github.bysy.spotifystreamer;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,7 +36,7 @@ import retrofit.client.Response;
 /**
  * Fragment to show the top songs of an artist.
  */
-public class TopSongsActivityFragment extends ImageListViewFragment {
+public class TopSongsActivityFragment extends Fragment {
     static class Key {
         private static final String SONG_ID = "SONG_ID";
         private static final String SONG_NAME = "SONG_NAME";
@@ -128,7 +129,7 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
             tv.setText(song.album.name);
             ImageView iv = (ImageView) item.findViewById(R.id.albumImageView);
             String imageUrl = Util.getImageUrl(song.album.images);
-            loadImageInto(imageUrl, iv);
+            Util.loadImageInto(getContext(), imageUrl, iv);
             return item;
         }
     }

@@ -5,6 +5,7 @@
 package com.github.bysy.spotifystreamer;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -40,7 +41,7 @@ import retrofit.client.Response;
 /**
  * Search for and display artists.
  */
-public class SearchActivityFragment extends ImageListViewFragment {
+public class SearchActivityFragment extends Fragment {
     private static class Key {
         private static final String SHOULD_SEARCH = "SHOULD_SEARCH";
         private static final String SEARCH_TEXT = "SEARCH_TEXT";
@@ -230,7 +231,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
             tv.setText(artist.name);
             ImageView iv = (ImageView) item.findViewById(R.id.artistImageView);
             String imageUrl = Util.getImageUrl(artist.images);
-            loadImageInto(imageUrl, iv);
+            Util.loadImageInto(getContext(), imageUrl, iv);
             return item;
         }
     }
