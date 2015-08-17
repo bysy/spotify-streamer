@@ -112,7 +112,7 @@ public class SearchActivityFragment extends Fragment {
                 }
                 String searchStr = v.getText().toString();
                 if (searchStr.length() == 0) return true;
-                disableInput();
+                unfocusInput();
                 runSearch(searchStr);
                 return true;
             }
@@ -143,7 +143,7 @@ public class SearchActivityFragment extends Fragment {
                 mArtists = pager.artists.items;
                 if (mArtists.isEmpty()) {
                     Util.showToast(getActivity(), "Sorry, no artists found with that name");
-                    enableInput();
+                    focusInput();
                 }
                 mAdapter.clear();
                 mAdapter.addAll(mArtists);
@@ -183,10 +183,8 @@ public class SearchActivityFragment extends Fragment {
         });
     }
 
-    // TODO: Rename these methods.
-
-    private void disableInput() {
-        // Change focus away from EditText to hide cursor and highlighting.
+    /** Change focus away from EditText to hide cursor and hide soft keyboard. */
+    private void unfocusInput() {
         // See also http://stackoverflow.com/questions/1555109/stop-edittext-from-gaining-focus-at-activity-startup
         getActivity().findViewById(R.id.searchText).clearFocus();
 
@@ -197,7 +195,8 @@ public class SearchActivityFragment extends Fragment {
         imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0);
     }
 
-    private void enableInput() {
+    /** Focus on EditText and show soft keyboard. */
+    private void focusInput() {
         EditText et = (EditText) getActivity().findViewById(R.id.searchText);
         et.requestFocus();
         InputMethodManager imm = (InputMethodManager)
