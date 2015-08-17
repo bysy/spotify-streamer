@@ -36,11 +36,13 @@ import retrofit.client.Response;
  * Fragment to show the top songs of an artist.
  */
 public class TopSongsActivityFragment extends ImageListViewFragment {
-    private static final String SONG_ID = "SONG_ID";  // TODO: Designate as keys.
-    private static final String SONG_NAME = "SONG_NAME";
-    static private String TAG = "BysySpot";
-    SongsAdapter mAdapter = null;
-    List<Track> mSongs = new ArrayList<>();
+    static class Key {
+        private static final String SONG_ID = "SONG_ID";
+        private static final String SONG_NAME = "SONG_NAME";
+    }
+    static private final String TAG = TopSongsActivityFragment.class.getSimpleName();
+    private SongsAdapter mAdapter = null;
+    private List<Track> mSongs = new ArrayList<>();
 
     public TopSongsActivityFragment() {
     }
@@ -51,14 +53,13 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
         setRetainInstance(true);  // TODO: Don't use setRetainInstance() in UI fragments.
         mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
         Intent in = getActivity().getIntent();
-        String id = in.getStringExtra(SearchActivity.ARTIST_ID);
+        String id = in.getStringExtra(SearchActivity.Key.ARTIST_ID);
         if (id==null || id.isEmpty()) {
-            Log.d(TAG, SearchActivity.ARTIST_ID + " is missing");
+            Log.d(TAG, SearchActivity.Key.ARTIST_ID + " is missing");
             getActivity().finish();
             return;
-        } else {
-            Log.d(TAG, "Searching for ID: ".concat(id));
         }
+        Log.d(TAG, "Searching for ID: ".concat(id));
         SpotifyApi spotApi = new SpotifyApi();
         SpotifyService spot = spotApi.getService();
         final String country = Util.getCountryCode();
@@ -95,8 +96,8 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
                 // Open player activity for this song
                 Track t = (Track) parent.getItemAtPosition(position);
                 Intent i = new Intent(getActivity(), PlayerActivity.class);
-                i.putExtra(SONG_ID, t.id);
-                i.putExtra(SONG_NAME, t.name);
+                i.putExtra(Key.SONG_ID, t.id);
+                i.putExtra(Key.SONG_NAME, t.name);
                 startActivity(i);
             }
         });

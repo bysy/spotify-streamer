@@ -12,8 +12,7 @@ import android.view.ViewGroup;
 
 
 /**
- * TODO: Correct doc string.
- * A placeholder fragment containing a simple view.
+ * Play a song.
  */
 public class PlayerActivityFragment extends Fragment {
 

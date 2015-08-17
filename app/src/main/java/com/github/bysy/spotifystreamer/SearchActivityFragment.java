@@ -38,11 +38,14 @@ import retrofit.client.Response;
 
 
 /**
- * Fragment to search for and display artists.
+ * Search for and display artists.
  */
 public class SearchActivityFragment extends ImageListViewFragment {
-    private static final String SHOULD_SEARCH = "should_search";  // TODO: Append key, correct case
-    private static String SEARCH_TEXT = "search_text";  // ..
+    private static class Key {
+        private static final String SHOULD_SEARCH = "SHOULD_SEARCH";
+        private static final String SEARCH_TEXT = "SEARCH_TEXT";
+    }
+    private static final String TAG = SearchActivityFragment.class.getSimpleName();
     private List<Artist> mArtists = new ArrayList<>();
     private ArtistAdapter mAdapter;
     private final SpotifyApi mSpotApi = new SpotifyApi();
@@ -63,14 +66,14 @@ public class SearchActivityFragment extends ImageListViewFragment {
     public void onSaveInstanceState(Bundle outState) {
         // TODO: Simplify control flow.
         super.onSaveInstanceState(outState);
-        outState.putBoolean(SHOULD_SEARCH, false);
+        outState.putBoolean(Key.SHOULD_SEARCH, false);
         EditText et = (EditText) getActivity().findViewById(R.id.searchText);
         if (et==null) { return; }
         String search = et.getText().toString();
         if (search.isEmpty()) { return; }
-        outState.putString(SEARCH_TEXT, search);
+        outState.putString(Key.SEARCH_TEXT, search);
         if (search.equals(mLastSearch)) {
-            outState.putBoolean(SHOULD_SEARCH, true);
+            outState.putBoolean(Key.SHOULD_SEARCH, true);
         }
     }
 
@@ -87,8 +90,8 @@ public class SearchActivityFragment extends ImageListViewFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Artist x = (Artist) parent.getItemAtPosition(position);
                 Intent i = new Intent(getActivity(), TopSongsActivity.class);
-                i.putExtra(SearchActivity.ARTIST_NAME, x.name);
-                i.putExtra(SearchActivity.ARTIST_ID, x.id);
+                i.putExtra(SearchActivity.Key.ARTIST_NAME, x.name);
+                i.putExtra(SearchActivity.Key.ARTIST_ID, x.id);
                 startActivity(i);
             }
         });
@@ -115,11 +118,11 @@ public class SearchActivityFragment extends ImageListViewFragment {
         });
         // Restore state
         if (savedInstanceState!=null) {
-            String searchStr = savedInstanceState.getString(SEARCH_TEXT);
+            String searchStr = savedInstanceState.getString(Key.SEARCH_TEXT);
             if (searchStr!=null) {
-                Log.d("BysySpot", "restoring from saved state");  // TODO: Use a constant field as tag for logging.
+                Log.d(TAG, "restoring from saved state");
                 et.setText(searchStr);
-                boolean doSearch = savedInstanceState.getBoolean(SHOULD_SEARCH);
+                boolean doSearch = savedInstanceState.getBoolean(Key.SHOULD_SEARCH);
                 if (doSearch) {
                     runSearch(searchStr);
                 }
@@ -129,7 +132,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
     }
 
     private void runSearch(String searchStr) {
-        Log.d("BysySpot", "searching for " + searchStr);
+        Log.d(TAG, "searching for " + searchStr);
         mLastSearch = searchStr;
         SpotifyService spot = mSpotApi.getService();
         spot.searchArtists(searchStr, new Callback<ArtistsPager>() {
@@ -162,7 +165,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
             return;
         }
         final String searchStr = mLastSearch;
-        Log.d("BysySpot", "searching for " + searchStr + " with offset " + offset);
+        Log.d(TAG, "searching for " + searchStr + " with offset " + offset);
         SpotifyService spot = mSpotApi.getService();
         Map<String,Object> options = new HashMap<>();
         options.put("offset", Integer.toString(offset));
@@ -174,7 +177,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
             }
             @Override
             public void failure(RetrofitError error) {
-                Log.d("BysySpot", "Failed to retrieve additional artists");
+                Log.d(TAG, "Failed to retrieve additional artists");
             }
         });
     }
@@ -219,7 +222,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
                 item = li.inflate(mResource, parent, false);
             }
             if (position==(getCount()-1-5)) {  // 5 before last makes for smoother scrolling
-                Log.d("BysySpot", "retrieving more artists at position " + Integer.toString(position));
+                Log.d(TAG, "retrieving more artists at position " + Integer.toString(position));
                 SearchActivityFragment.this.retrieveMoreArtists();
             }
             Artist artist = getItem(position);

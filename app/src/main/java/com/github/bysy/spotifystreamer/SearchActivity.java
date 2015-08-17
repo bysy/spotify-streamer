@@ -11,8 +11,10 @@ import android.view.MenuItem;
 
 
 public class SearchActivity extends AppCompatActivity {
-    static final String ARTIST_NAME = "artist_name";  // TODO: Append key?
-    static final String ARTIST_ID = "artist_id";  // TODO: Correct case.
+    static class Key {
+        static final String ARTIST_NAME = "ARTIST_NAME";
+        static final String ARTIST_ID = "ARTIST_ID";
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -5,12 +5,12 @@
 package com.github.bysy.spotifystreamer;
 
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-// TODO: Add doc string. Correct super.
-public class PlayerActivity extends ActionBarActivity {
+/** Play a song. */
+public class PlayerActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
