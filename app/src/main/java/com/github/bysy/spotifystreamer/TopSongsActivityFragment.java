@@ -36,7 +36,7 @@ import retrofit.client.Response;
  * Fragment to show the top songs of an artist.
  */
 public class TopSongsActivityFragment extends ImageListViewFragment {
-    private static final String SONG_ID = "SONG_ID";
+    private static final String SONG_ID = "SONG_ID";  // TODO: Designate as keys.
     private static final String SONG_NAME = "SONG_NAME";
     static private String TAG = "BysySpot";
     SongsAdapter mAdapter = null;
@@ -48,7 +48,7 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+        setRetainInstance(true);  // TODO: Don't use setRetainInstance() in UI fragments.
         mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
         Intent in = getActivity().getIntent();
         String id = in.getStringExtra(SearchActivity.ARTIST_ID);
@@ -115,6 +115,7 @@ public class TopSongsActivityFragment extends ImageListViewFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View item = convertView;
+            // TODO: Use view holder pattern.
             if (item==null) {
                 LayoutInflater li = getActivity().getLayoutInflater();
                 item = li.inflate(mResource, parent, false);

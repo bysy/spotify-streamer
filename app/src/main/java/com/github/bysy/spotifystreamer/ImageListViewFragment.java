@@ -13,6 +13,7 @@ import com.squareup.picasso.Picasso;
 
 /**
  * Help with safe image loading into ListView items.
+ * TODO: Refactor to static method and remove this class.
  */
 public class ImageListViewFragment extends Fragment {
     /** Load image at imageUrl into imageView and set background color appropriately. */

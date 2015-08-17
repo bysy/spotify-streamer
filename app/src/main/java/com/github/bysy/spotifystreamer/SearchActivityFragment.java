@@ -41,8 +41,8 @@ import retrofit.client.Response;
  * Fragment to search for and display artists.
  */
 public class SearchActivityFragment extends ImageListViewFragment {
-    private static final String SHOULD_SEARCH = "should_search";
-    private static String SEARCH_TEXT = "search_text";
+    private static final String SHOULD_SEARCH = "should_search";  // TODO: Append key, correct case
+    private static String SEARCH_TEXT = "search_text";  // ..
     private List<Artist> mArtists = new ArrayList<>();
     private ArtistAdapter mAdapter;
     private final SpotifyApi mSpotApi = new SpotifyApi();
@@ -55,12 +55,13 @@ public class SearchActivityFragment extends ImageListViewFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+        setRetainInstance(true);  // TODO: Move expensive state (SpotifyApi) to non-UI fragment as per recommendation.
         mAdapter = new ArtistAdapter(getActivity(), R.layout.single_artist, mArtists);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        // TODO: Simplify control flow.
         super.onSaveInstanceState(outState);
         outState.putBoolean(SHOULD_SEARCH, false);
         EditText et = (EditText) getActivity().findViewById(R.id.searchText);
@@ -116,7 +117,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
         if (savedInstanceState!=null) {
             String searchStr = savedInstanceState.getString(SEARCH_TEXT);
             if (searchStr!=null) {
-                Log.d("BysySpot", "restoring from saved state");
+                Log.d("BysySpot", "restoring from saved state");  // TODO: Use a constant field as tag for logging.
                 et.setText(searchStr);
                 boolean doSearch = savedInstanceState.getBoolean(SHOULD_SEARCH);
                 if (doSearch) {
@@ -178,6 +179,8 @@ public class SearchActivityFragment extends ImageListViewFragment {
         });
     }
 
+    // TODO: Rename these methods.
+
     private void disableInput() {
         // Change focus away from EditText to hide cursor and highlighting.
         // See also http://stackoverflow.com/questions/1555109/stop-edittext-from-gaining-focus-at-activity-startup
@@ -210,6 +213,7 @@ public class SearchActivityFragment extends ImageListViewFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View item = convertView;
+            // TODO: Use view holder pattern.
             if (item==null) {
                 LayoutInflater li = getActivity().getLayoutInflater();
                 item = li.inflate(mResource, parent, false);
