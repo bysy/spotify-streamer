@@ -8,6 +8,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -117,20 +119,40 @@ public class TopSongsActivityFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View item = convertView;
-            // TODO: Use view holder pattern.
             if (item==null) {
                 LayoutInflater li = getActivity().getLayoutInflater();
                 item = li.inflate(mResource, parent, false);
+                item.setTag(new ViewHolder(item));
             }
+            ViewHolder views = (ViewHolder) item.getTag();
             Track song = getItem(position);
-            TextView tv = (TextView) item.findViewById(R.id.songNameView);
-            tv.setText(song.name);
-            tv = (TextView) item.findViewById(R.id.albumNameView);
-            tv.setText(song.album.name);
-            ImageView iv = (ImageView) item.findViewById(R.id.albumImageView);
+            views.songName.setText(song.name);
+            views.albumName.setText(song.album.name);
             String imageUrl = Util.getImageUrl(song.album.images);
-            Util.loadImageInto(getContext(), imageUrl, iv);
+            Util.loadImageInto(getContext(), imageUrl, views.albumImage);
             return item;
+        }
+
+        class ViewHolder {
+            final ImageView albumImage;
+            final TextView albumName;
+            final TextView songName;
+
+            ViewHolder(@NonNull View view) {
+                albumImage = (ImageView) view.findViewById(R.id.albumImageView);
+                albumName = (TextView) view.findViewById(R.id.albumNameView);
+                songName = (TextView) view.findViewById(R.id.songNameView);
+
+                if (!isInitialized()) {
+                    throw new InvalidParameterException("Invalid layout");
+                }
+            }
+
+            boolean isInitialized() {
+                return albumImage!=null &&
+                        albumName!=null &&
+                        songName!=null;
+            }
         }
     }
 }

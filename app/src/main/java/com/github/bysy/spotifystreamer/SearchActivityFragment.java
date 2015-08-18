@@ -9,6 +9,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -24,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -216,22 +218,39 @@ public class SearchActivityFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View item = convertView;
-            // TODO: Use view holder pattern.
             if (item==null) {
                 LayoutInflater li = getActivity().getLayoutInflater();
                 item = li.inflate(mResource, parent, false);
+                item.setTag(new ViewHolder(item));
             }
             if (position==(getCount()-1-5)) {  // 5 before last makes for smoother scrolling
                 Log.d(TAG, "retrieving more artists at position " + Integer.toString(position));
                 SearchActivityFragment.this.retrieveMoreArtists();
             }
+            ViewHolder views = (ViewHolder) item.getTag();
             Artist artist = getItem(position);
-            TextView tv = (TextView) item.findViewById(R.id.artistNameView);
-            tv.setText(artist.name);
-            ImageView iv = (ImageView) item.findViewById(R.id.artistImageView);
+            views.artistName.setText(artist.name);
             String imageUrl = Util.getImageUrl(artist.images);
-            Util.loadImageInto(getContext(), imageUrl, iv);
+            Util.loadImageInto(getContext(), imageUrl, views.artistImage);
             return item;
+        }
+
+        class ViewHolder {
+            final ImageView artistImage;
+            final TextView artistName;
+
+            ViewHolder(@NonNull View view) {
+                artistImage = (ImageView) view.findViewById(R.id.artistImageView);
+                artistName = (TextView) view.findViewById(R.id.artistNameView);
+                if (!isInitialized()) {
+                    throw new InvalidParameterException("Invalid layout");
+                }
+            }
+
+            private boolean isInitialized() {
+                return artistImage!=null &&
+                        artistName!=null;
+            }
         }
     }
 }
