@@ -8,11 +8,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
 public class TopSongsActivity extends AppCompatActivity {
+    private static final String TAG = TopSongsActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,9 +22,10 @@ public class TopSongsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_top_songs);
         Intent in = getIntent();
         String name = in.getStringExtra(SearchActivity.Key.ARTIST_NAME);
-        if (name==null || name.isEmpty()) {
-            Util.showToast(this, "No artist's name supplied");
-            finish();
+        if (name==null) name = "";
+        if (name.isEmpty()) {
+            Log.e(TAG, SearchActivity.Key.ARTIST_NAME + " is missing");
+            name = getString(R.string.app_name);
         }
         ActionBar ab = getSupportActionBar();
         if (ab!=null) {

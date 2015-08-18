@@ -58,8 +58,7 @@ public class TopSongsActivityFragment extends Fragment {
         Intent in = getActivity().getIntent();
         String id = in.getStringExtra(SearchActivity.Key.ARTIST_ID);
         if (id==null || id.isEmpty()) {
-            Log.d(TAG, SearchActivity.Key.ARTIST_ID + " is missing");
-            getActivity().finish();
+            Log.e(TAG, SearchActivity.Key.ARTIST_ID + " is missing");
             return;
         }
         Log.d(TAG, "Searching for ID: ".concat(id));
