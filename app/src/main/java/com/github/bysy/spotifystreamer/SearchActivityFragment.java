@@ -70,16 +70,19 @@ public class SearchActivityFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        // TODO: Simplify control flow.
         super.onSaveInstanceState(outState);
-        outState.putBoolean(Key.SHOULD_SEARCH, false);
-        if (mSearchText==null) { return; }
-        String search = mSearchText.getText().toString();
-        if (search.isEmpty()) { return; }
-        outState.putString(Key.SEARCH_TEXT, search);
-        if (search.equals(mLastSearch)) {
-            outState.putBoolean(Key.SHOULD_SEARCH, true);
+        // Save the search text and whether the user has run this search.
+        boolean shouldSearch = false;
+        if (mSearchText!=null) {
+            final String search = mSearchText.getText().toString();
+            if (!search.isEmpty()) {
+                outState.putString(Key.SEARCH_TEXT, search);
+                if (search.equals(mLastSearch)) {
+                    shouldSearch = true;
+                }
+            }
         }
+        outState.putBoolean(Key.SHOULD_SEARCH, shouldSearch);
     }
 
     @Override
