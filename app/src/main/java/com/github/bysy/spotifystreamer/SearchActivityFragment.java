@@ -49,6 +49,9 @@ public class SearchActivityFragment extends Fragment {
         private static final String SEARCH_TEXT = "SEARCH_TEXT";
     }
     private static final String TAG = SearchActivityFragment.class.getSimpleName();
+
+    private ListView mArtistsListView;
+    private EditText mSearchText;
     private List<Artist> mArtists = new ArrayList<>();
     private ArtistAdapter mAdapter;
     private final SpotifyApi mSpotApi = new SpotifyApi();
@@ -70,9 +73,8 @@ public class SearchActivityFragment extends Fragment {
         // TODO: Simplify control flow.
         super.onSaveInstanceState(outState);
         outState.putBoolean(Key.SHOULD_SEARCH, false);
-        EditText et = (EditText) getActivity().findViewById(R.id.searchText);
-        if (et==null) { return; }
-        String search = et.getText().toString();
+        if (mSearchText==null) { return; }
+        String search = mSearchText.getText().toString();
         if (search.isEmpty()) { return; }
         outState.putString(Key.SEARCH_TEXT, search);
         if (search.equals(mLastSearch)) {
@@ -85,10 +87,10 @@ public class SearchActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
 
-        ListView lv = (ListView) view.findViewById(R.id.artistListView);
-        lv.setAdapter(mAdapter);
+        mArtistsListView = (ListView) view.findViewById(R.id.artistListView);
+        mArtistsListView.setAdapter(mAdapter);
 
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mArtistsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Artist x = (Artist) parent.getItemAtPosition(position);
@@ -98,8 +100,8 @@ public class SearchActivityFragment extends Fragment {
                 startActivity(i);
             }
         });
-        final EditText et = (EditText) view.findViewById(R.id.searchText);
-        et.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mSearchText = (EditText) view.findViewById(R.id.searchText);
+        mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 // Handle Search action from soft keyboard and
@@ -124,7 +126,7 @@ public class SearchActivityFragment extends Fragment {
             String searchStr = savedInstanceState.getString(Key.SEARCH_TEXT);
             if (searchStr!=null) {
                 Log.d(TAG, "restoring from saved state");
-                et.setText(searchStr);
+                mSearchText.setText(searchStr);
                 boolean doSearch = savedInstanceState.getBoolean(Key.SHOULD_SEARCH);
                 if (doSearch) {
                     runSearch(searchStr);
@@ -149,11 +151,10 @@ public class SearchActivityFragment extends Fragment {
                 }
                 mAdapter.clear();
                 mAdapter.addAll(mArtists);
-                ListView lv = (ListView) getActivity().findViewById(R.id.artistListView);
-                lv.setSelectionAfterHeaderView();
+                mArtistsListView.setSelectionAfterHeaderView();
 
                 // Workaround for ease of use with hardware keyboard
-                getActivity().findViewById(R.id.artistListView).requestFocus();
+                mArtistsListView.requestFocus();
             }
             @Override
             public void failure(RetrofitError error) {
@@ -188,7 +189,7 @@ public class SearchActivityFragment extends Fragment {
     /** Change focus away from EditText to hide cursor and hide soft keyboard. */
     private void unfocusInput() {
         // See also http://stackoverflow.com/questions/1555109/stop-edittext-from-gaining-focus-at-activity-startup
-        getActivity().findViewById(R.id.searchText).clearFocus();
+        mSearchText.clearFocus();
 
         // Hide keyboard when it's visible. This is tricky.
         // Thanks to http://stackoverflow.com/a/15587937
@@ -199,11 +200,10 @@ public class SearchActivityFragment extends Fragment {
 
     /** Focus on EditText and show soft keyboard. */
     private void focusInput() {
-        EditText et = (EditText) getActivity().findViewById(R.id.searchText);
-        et.requestFocus();
+        mSearchText.requestFocus();
         InputMethodManager imm = (InputMethodManager)
                 getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
+        imm.showSoftInput(mSearchText, InputMethodManager.SHOW_IMPLICIT);
     }
 
 
