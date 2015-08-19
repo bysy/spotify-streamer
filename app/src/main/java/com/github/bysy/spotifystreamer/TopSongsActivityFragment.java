@@ -19,6 +19,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.bysy.spotifystreamer.data.SongInfo;
+
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,7 +29,6 @@ import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -49,7 +50,7 @@ public class TopSongsActivityFragment extends Fragment {
     }
     static private final String TAG = TopSongsActivityFragment.class.getSimpleName();
     private SongsAdapter mAdapter = null;
-    private List<Track> mSongs = new ArrayList<>();
+    private List<SongInfo> mSongs = new ArrayList<>();
 
     public TopSongsActivityFragment() {
     }
@@ -75,7 +76,7 @@ public class TopSongsActivityFragment extends Fragment {
         spot.getArtistTopTrack(id, options, new Callback<Tracks>() {
             @Override
             public void success(final Tracks tracks, Response response) {
-                mSongs = tracks.tracks;
+                mSongs = SongInfo.listOf(tracks.tracks);
                 if (mSongs.isEmpty()) {
                     Util.showToast(getActivity(), "No songs available for selected artist.");
                 }
@@ -100,15 +101,15 @@ public class TopSongsActivityFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Open player activity for this song
-                Track t = (Track) parent.getItemAtPosition(position);
+                SongInfo song = (SongInfo) parent.getItemAtPosition(position);
 
                 Intent i = new Intent(getActivity(), PlayerActivity.class);
-                i.putExtra(Key.SONG_ID, t.id);
-                i.putExtra(Key.ARTIST_NAME, t.artists.get(0).name);
-                i.putExtra(Key.ALBUM_NAME, t.album.name);
-                i.putExtra(Key.SONG_NAME, t.name);
-                i.putExtra(Key.SONG_PREVIEW_URL, t.preview_url);
-                i.putExtra(Key.ALBUM_IMAGE_URL, Util.getLargeImageUrl(t.album.images));
+                i.putExtra(Key.SONG_ID, song.id);
+                i.putExtra(Key.ARTIST_NAME, song.primaryArtistName);
+                i.putExtra(Key.ALBUM_NAME, song.albumName);
+                i.putExtra(Key.SONG_NAME, song.name);
+                i.putExtra(Key.SONG_PREVIEW_URL, song.previewUrl);
+                i.putExtra(Key.ALBUM_IMAGE_URL, song.albumImageUrl);
                 startActivity(i);
             }
         });
@@ -116,10 +117,10 @@ public class TopSongsActivityFragment extends Fragment {
     }
 
 
-    class SongsAdapter extends ArrayAdapter<Track> {
+    class SongsAdapter extends ArrayAdapter<SongInfo> {
         private final int mResource;
 
-        SongsAdapter(Context context, int resource, List<Track> songs) {
+        SongsAdapter(Context context, int resource, List<SongInfo>songs) {
             super(context, resource, songs);
             mResource = resource;
         }
@@ -133,10 +134,10 @@ public class TopSongsActivityFragment extends Fragment {
                 item.setTag(new ViewHolder(item));
             }
             ViewHolder views = (ViewHolder) item.getTag();
-            Track song = getItem(position);
+            SongInfo song = getItem(position);
             views.songName.setText(song.name);
-            views.albumName.setText(song.album.name);
-            String imageUrl = Util.getImageUrl(song.album.images);
+            views.albumName.setText(song.albumName);
+            String imageUrl = song.albumImageUrl;
             Util.loadImageInto(getContext(), imageUrl, views.albumImage);
             return item;
         }

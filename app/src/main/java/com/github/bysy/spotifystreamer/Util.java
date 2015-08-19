@@ -23,7 +23,7 @@ import kaaes.spotify.webapi.android.models.Image;
 /**
  * Utilities.
  */
-class Util {
+public class Util {
     /** Return the two character ISO code for user's preferred locale or "US" if not available. */
     static String getCountryCode() {
         String res = Locale.getDefault().getCountry();
@@ -44,7 +44,7 @@ class Util {
     }
 
     @Nullable
-    static String getLargeImageUrl(@NonNull List<Image> images) {
+    public static String getLargeImageUrl(@NonNull List<Image> images) {
         if (images.isEmpty()) return null;
         final String url = images.get(0).url;
         if (!Patterns.WEB_URL.matcher(url).matches()) return null;
