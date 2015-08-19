@@ -70,34 +70,12 @@ public class TopSongsActivityFragment extends Fragment {
         mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
         // First run: Query Spotify
         Intent in = getActivity().getIntent();
-        String id = in.getStringExtra(SearchActivity.Key.ARTIST_ID);
-        if (id==null || id.isEmpty()) {
+        String artistId = in.getStringExtra(SearchActivity.Key.ARTIST_ID);
+        if (artistId==null || artistId.isEmpty()) {
             Log.e(TAG, SearchActivity.Key.ARTIST_ID + " is missing");
             return;
         }
-        Log.d(TAG, "Searching for ID: ".concat(id));
-        SpotifyApi spotApi = new SpotifyApi();
-        SpotifyService spot = spotApi.getService();
-        final String country = Util.getCountryCode();
-        Log.d(TAG, "Country is ".concat(country));
-        Map<String,Object> options = new HashMap<>();
-        options.put("country", country);
-        spot.getArtistTopTrack(id, options, new Callback<Tracks>() {
-            @Override
-            public void success(final Tracks tracks, Response response) {
-                mSongs = new ArrayList<>(SongInfo.listOf(tracks.tracks));
-                if (mSongs.isEmpty()) {
-                    Util.showToast(getActivity(), "No songs available for selected artist.");
-                }
-                mAdapter.clear();
-                mAdapter.addAll(mSongs);
-            }
-            @Override
-            public void failure(RetrofitError error) {
-                Log.d(TAG, "Top tracks failure: ".concat(error.toString()));
-                Util.showToast(getActivity(), "Couldn't connect to Spotify");
-            }
-        });
+        updateSongs(artistId);
     }
 
     @Override
@@ -129,6 +107,34 @@ public class TopSongsActivityFragment extends Fragment {
             }
         });
         return view;
+    }
+
+    /** Retrieve top tracks from Spotify and update mSongs and UI accordingly. */
+    private void updateSongs(String artistId) {
+        Log.d(TAG, "Searching for ID: ".concat(artistId));
+        SpotifyApi spotApi = new SpotifyApi();
+        SpotifyService spot = spotApi.getService();
+        final String country = Util.getCountryCode();
+        Log.d(TAG, "Country is ".concat(country));
+        Map<String,Object> options = new HashMap<>();
+        options.put("country", country);
+        spot.getArtistTopTrack(artistId, options, new Callback<Tracks>() {
+            @Override
+            public void success(final Tracks tracks, Response response) {
+                mSongs = new ArrayList<>(SongInfo.listOf(tracks.tracks));
+                if (mSongs.isEmpty()) {
+                    Util.showToast(getActivity(), "No songs available for selected artist.");
+                }
+                mAdapter.clear();
+                mAdapter.addAll(mSongs);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.d(TAG, "Top tracks failure: ".concat(error.toString()));
+                Util.showToast(getActivity(), "Couldn't connect to Spotify");
+            }
+        });
     }
 
 
