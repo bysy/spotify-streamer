@@ -47,10 +47,11 @@ public class TopSongsActivityFragment extends Fragment {
         public static final String ALBUM_IMAGE_URL = "ALBUM_IMAGE_URL";
         public static final String ARTIST_NAME = "ARTIST_NAME";
         public static final String ALBUM_NAME = "ALBUM_NAME";
+        public static final String SONGS_PARCEL = "SONGS_PARCEL";
     }
     static private final String TAG = TopSongsActivityFragment.class.getSimpleName();
-    private SongsAdapter mAdapter = null;
-    private List<SongInfo> mSongs = new ArrayList<>();
+    private SongsAdapter mAdapter;
+    private ArrayList<SongInfo> mSongs;
 
     public TopSongsActivityFragment() {
     }
@@ -58,8 +59,16 @@ public class TopSongsActivityFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);  // TODO: Don't use setRetainInstance() in UI fragments.
+
+        // Restore state
+        if (savedInstanceState!=null) {
+            mSongs = savedInstanceState.getParcelableArrayList(Key.SONGS_PARCEL);
+            mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
+            return;
+        }
+        mSongs = new ArrayList<>(10);
         mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
+        // First run: Query Spotify
         Intent in = getActivity().getIntent();
         String id = in.getStringExtra(SearchActivity.Key.ARTIST_ID);
         if (id==null || id.isEmpty()) {
@@ -76,7 +85,7 @@ public class TopSongsActivityFragment extends Fragment {
         spot.getArtistTopTrack(id, options, new Callback<Tracks>() {
             @Override
             public void success(final Tracks tracks, Response response) {
-                mSongs = SongInfo.listOf(tracks.tracks);
+                mSongs = new ArrayList<>(SongInfo.listOf(tracks.tracks));
                 if (mSongs.isEmpty()) {
                     Util.showToast(getActivity(), "No songs available for selected artist.");
                 }
@@ -89,6 +98,12 @@ public class TopSongsActivityFragment extends Fragment {
                 Util.showToast(getActivity(), "Couldn't connect to Spotify");
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(Key.SONGS_PARCEL, mSongs);
     }
 
     @Override
