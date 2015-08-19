@@ -63,4 +63,34 @@ public class SongInfo {
         albumImageUrl = imageUrl==null ? "" : imageUrl;
         previewUrl = spotifyTrack.preview_url;
     }
+
+    // Implement equals() and hashCode(). Thanks AndroidStudio!
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SongInfo songInfo = (SongInfo) o;
+
+        if (numberOfArtists != songInfo.numberOfArtists) return false;
+        if (!id.equals(songInfo.id)) return false;
+        if (!primaryArtistName.equals(songInfo.primaryArtistName)) return false;
+        if (!albumName.equals(songInfo.albumName)) return false;
+        if (!name.equals(songInfo.name)) return false;
+        if (!albumImageUrl.equals(songInfo.albumImageUrl)) return false;
+        return previewUrl.equals(songInfo.previewUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + primaryArtistName.hashCode();
+        result = 31 * result + numberOfArtists;
+        result = 31 * result + albumName.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + albumImageUrl.hashCode();
+        result = 31 * result + previewUrl.hashCode();
+        return result;
+    }
 }
