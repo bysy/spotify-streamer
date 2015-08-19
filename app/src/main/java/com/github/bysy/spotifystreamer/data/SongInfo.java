@@ -20,15 +20,16 @@ import kaaes.spotify.webapi.android.models.Track;
  * Capture information about a song.
  */
 public class SongInfo {
-    public final String id;
+    @NonNull public final String id;
     /** The first artist listed. */
-    public final String primaryArtistName;
+    @NonNull public final String primaryArtistName;
     /** The number of artists credited with creating this track. */
     public final int numberOfArtists;
-    public final String albumName;
-    public final String name;
-    public final String albumImageUrl;
-    public final String previewUrl;
+    @NonNull public final String albumName;
+    @NonNull public final String name;
+    /** Url for the album image. Guaranteed to hold a pattern-valid Url if non-empty. */
+    @NonNull public final String albumImageUrl;
+    @NonNull public final String previewUrl;
 
     /** Create a list from Spotify Web Api tracks. */
     @NonNull
@@ -58,7 +59,8 @@ public class SongInfo {
         numberOfArtists = spotifyTrack.artists.size();
         albumName = spotifyTrack.album.name;
         name = spotifyTrack.name;
-        albumImageUrl = Util.getLargeImageUrl(spotifyTrack.album.images);
+        final String imageUrl = Util.getLargeImageUrl(spotifyTrack.album.images);
+        albumImageUrl = imageUrl==null ? "" : imageUrl;
         previewUrl = spotifyTrack.preview_url;
     }
 }
