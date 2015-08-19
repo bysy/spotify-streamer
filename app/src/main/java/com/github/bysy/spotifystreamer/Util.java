@@ -43,6 +43,13 @@ class Util {
         return url;
     }
 
+    @Nullable
+    static String getLargeImageUrl(@NonNull List<Image> images) {
+        if (images.isEmpty()) return null;
+        final String url = images.get(0).url;
+        if (!Patterns.WEB_URL.matcher(url).matches()) return null;
+        return url;
+    }
     /** Return the smallest usable image. */
     private static Image findSmallImage(@NonNull List<Image> images) {
         // NOTE: Spotify's docs say the first image is always the widest but don't specify
@@ -66,7 +73,7 @@ class Util {
         if (imageUrl!=null) {
             imageView.setBackgroundColor(loadingColorId);
             Picasso.with(context)
-                    .load(imageUrl).centerCrop().resize(128,128).onlyScaleDown()
+                    .load(imageUrl) //.centerCrop().resize(128,128).onlyScaleDown()
                     .error(unavailableColorId).into(imageView);
         } else {
             imageView.setBackgroundColor(unavailableColorId);

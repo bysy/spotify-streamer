@@ -40,8 +40,12 @@ import retrofit.client.Response;
  */
 public class TopSongsActivityFragment extends Fragment {
     static class Key {
-        private static final String SONG_ID = "SONG_ID";
-        private static final String SONG_NAME = "SONG_NAME";
+        public static final String SONG_ID = "SONG_ID";
+        public static final String SONG_NAME = "SONG_NAME";
+        public static final String SONG_PREVIEW_URL = "SONG_PREVIEW_URL";
+        public static final String ALBUM_IMAGE_URL = "ALBUM_IMAGE_URL";
+        public static final String ARTIST_NAME = "ARTIST_NAME";
+        public static final String ALBUM_NAME = "ALBUM_NAME";
     }
     static private final String TAG = TopSongsActivityFragment.class.getSimpleName();
     private SongsAdapter mAdapter = null;
@@ -97,9 +101,14 @@ public class TopSongsActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Open player activity for this song
                 Track t = (Track) parent.getItemAtPosition(position);
+
                 Intent i = new Intent(getActivity(), PlayerActivity.class);
                 i.putExtra(Key.SONG_ID, t.id);
+                i.putExtra(Key.ARTIST_NAME, t.artists.get(0).name);
+                i.putExtra(Key.ALBUM_NAME, t.album.name);
                 i.putExtra(Key.SONG_NAME, t.name);
+                i.putExtra(Key.SONG_PREVIEW_URL, t.preview_url);
+                i.putExtra(Key.ALBUM_IMAGE_URL, Util.getLargeImageUrl(t.album.images));
                 startActivity(i);
             }
         });
