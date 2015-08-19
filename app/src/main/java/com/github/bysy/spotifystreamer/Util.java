@@ -70,7 +70,7 @@ public class Util {
         final int unavailableColorId = resources.getColor(R.color.unavailable);
         final int questionMarkId = android.R.drawable.ic_menu_help;
 
-        if (imageUrl!=null) {
+        if (imageUrl!=null && !imageUrl.isEmpty()) {
             imageView.setBackgroundColor(loadingColorId);
             Picasso.with(context)
                     .load(imageUrl) //.centerCrop().resize(128,128).onlyScaleDown()
