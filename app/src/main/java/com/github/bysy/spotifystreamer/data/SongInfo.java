@@ -4,6 +4,8 @@
 
 package com.github.bysy.spotifystreamer.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -19,7 +21,8 @@ import kaaes.spotify.webapi.android.models.Track;
 /**
  * Capture information about a song.
  */
-public class SongInfo {
+public class SongInfo implements Parcelable {
+    // NOTE: If changing fields or field order, update Parcelable implementation.
     @NonNull public final String id;
     /** The first artist listed. */
     @NonNull public final String primaryArtistName;
@@ -30,6 +33,45 @@ public class SongInfo {
     /** Url for the album image. Guaranteed to hold a pattern-valid Url if non-empty. */
     @NonNull public final String albumImageUrl;
     @NonNull public final String previewUrl;
+
+    // Implement Parcelable
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(primaryArtistName);
+        dest.writeInt(numberOfArtists);
+        dest.writeString(albumName);
+        dest.writeString(name);
+        dest.writeString(albumImageUrl);
+        dest.writeString(previewUrl);
+    }
+
+    protected SongInfo(Parcel in) {
+        id = in.readString();
+        primaryArtistName = in.readString();
+        numberOfArtists = in.readInt();
+        albumName = in.readString();
+        name = in.readString();
+        albumImageUrl = in.readString();
+        previewUrl = in.readString();
+    }
+
+    public static final Creator<SongInfo> CREATOR = new Creator<SongInfo>() {
+        @Override
+        public SongInfo createFromParcel(Parcel in) {
+            return new SongInfo(in);
+        }
+        @Override
+        public SongInfo[] newArray(int size) {
+            return new SongInfo[size];
+        }
+    };
 
     /** Create a list from Spotify Web Api tracks. */
     @NonNull
@@ -78,6 +120,7 @@ public class SongInfo {
         if (!primaryArtistName.equals(songInfo.primaryArtistName)) return false;
         if (!albumName.equals(songInfo.albumName)) return false;
         if (!name.equals(songInfo.name)) return false;
+        //noinspection SimplifiableIfStatement
         if (!albumImageUrl.equals(songInfo.albumImageUrl)) return false;
         return previewUrl.equals(songInfo.previewUrl);
     }
