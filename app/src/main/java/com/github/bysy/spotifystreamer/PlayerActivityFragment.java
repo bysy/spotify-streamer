@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -42,7 +43,43 @@ public class PlayerActivityFragment extends Fragment implements MediaPlayer.OnPr
         albumTextView.setText(in.getStringExtra(TopSongsActivityFragment.Key.ALBUM_NAME));
         TextView songTextView = (TextView) view.findViewById(R.id.songNameView);
         songTextView.setText(in.getStringExtra(TopSongsActivityFragment.Key.SONG_NAME));
+
+        View buttonBar = view.findViewById(R.id.buttons);
+        ImageButton prevButton = (ImageButton) buttonBar.findViewById(R.id.previousButton);
+        ImageButton playButton = (ImageButton) buttonBar.findViewById(R.id.playButton);
+        ImageButton nextButton = (ImageButton) buttonBar.findViewById(R.id.nextButton);
+
+        prevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPrevButtonClick();
+            }
+        });
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onPlayButtonClick();
+            }
+        });
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onNextButtonClick();
+            }
+        });
         return view;
+    }
+
+    private void onPrevButtonClick() {
+        Util.showToast(getActivity(), "Previous clicked");
+    }
+
+    private void onPlayButtonClick() {
+        Util.showToast(getActivity(), "Play clicked");
+    }
+
+    private void onNextButtonClick() {
+        Util.showToast(getActivity(), "Next clicked");
     }
 
     @Override
