@@ -26,12 +26,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     private static String TAG = PlayerService.class.getSimpleName();
     private ArrayList<SongInfo> mSongs;
     private MediaPlayer mMediaPlayer;
-    private SongInfo mCurrentSong;
     private int mCurrentIndex = 0;
 
     public static final String ACTION_NEW_PLAYLIST = "ACTION_NEW_PLAYLIST";
-    public static final String ACTION_PREVIOUS = "ACTION_PREVIOUS";
-    public static final String ACTION_NEXT = "ACTION_NEXT";
+    public static final String ACTION_CHANGE_SONG = "ACTION_CHANGE_SONG";
 
     @Nullable
     @Override
@@ -45,14 +43,11 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         boolean success;
         final String action = intent==null ? ACTION_NULL : intent.getAction();
         switch (action) {
+            case ACTION_CHANGE_SONG:
+                success = initializeIfNecessary(intent) && prepareAndStart();
+                break;
             case ACTION_NEW_PLAYLIST:
                 success = handleNewPlaylist(intent);
-                break;
-            case ACTION_PREVIOUS:
-                success = handleSkip(-1);
-                break;
-            case ACTION_NEXT:
-                success = handleSkip(1);
                 break;
             case ACTION_NULL:
                 Log.d(TAG, "Intent is null. Nothing to do.");
@@ -69,34 +64,32 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         return mode;
     }
 
-    private boolean handleSkip(int i) {
-        final int newIndex = mCurrentIndex + i;
-        // Loop from first to last and vice versa.
-        mCurrentIndex = newIndex<0 ? mSongs.size()-1 : (newIndex>=mSongs.size() ? 0 : newIndex);
-        mMediaPlayer.reset();
-        return prepareAndStart();
-    }
-
-    /** Start playing a new list of songs. Returns whether media player was correctly set up. */
-    private boolean handleNewPlaylist(Intent intent) {
-        mSongs = intent.getParcelableArrayListExtra(TopSongsActivityFragment.Key.SONGS_PARCEL);
-        if (mSongs == null || mSongs.isEmpty()) {
-            return false;
-        }
-        if (mMediaPlayer == null) {
+    private boolean initializeIfNecessary(Intent intent) {
+        if (mMediaPlayer==null) {
             mMediaPlayer = new MediaPlayer();
         } else {
             mMediaPlayer.reset();
         }
         mCurrentIndex = intent.getIntExtra(TopSongsActivityFragment.Key.CURRENT_SONG, 0);
-        return prepareAndStart();
+        if (mSongs==null) {
+            mSongs = intent.getParcelableArrayListExtra(TopSongsActivityFragment.Key.SONGS_PARCEL);
+            if (mSongs==null || mSongs.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Start playing a new list of songs. Returns whether media player was correctly set up. */
+    private boolean handleNewPlaylist(Intent intent) {
+        mSongs = intent.getParcelableArrayListExtra(TopSongsActivityFragment.Key.SONGS_PARCEL);
+        return initializeIfNecessary(intent) && prepareAndStart();
     }
 
     private boolean prepareAndStart() {
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         if (mCurrentIndex>=mSongs.size()) mCurrentIndex = 0;
-        mCurrentSong = mSongs.get(mCurrentIndex);
-        final String previewUrl = mCurrentSong.previewUrl;
+        final String previewUrl = mSongs.get(mCurrentIndex).previewUrl;
         Log.d(TAG, "Trying to play ".concat(previewUrl));
         try {
             mMediaPlayer.setDataSource(previewUrl);

@@ -106,7 +106,8 @@ public class PlayerActivityFragment extends Fragment {
 
     private void onPrevButtonClick() {
         Util.showToast(getActivity(), "Previous clicked");
-        sendPlayerCommand(PlayerService.ACTION_PREVIOUS);
+        modifyCurrentIndex(-1);
+        sendPlayerCommand(PlayerService.ACTION_CHANGE_SONG);
     }
 
     private void onPlayButtonClick() {
@@ -115,7 +116,14 @@ public class PlayerActivityFragment extends Fragment {
 
     private void onNextButtonClick() {
         Util.showToast(getActivity(), "Next clicked");
-        sendPlayerCommand(PlayerService.ACTION_NEXT);
+        modifyCurrentIndex(1);
+        sendPlayerCommand(PlayerService.ACTION_CHANGE_SONG);
+    }
+
+    private void modifyCurrentIndex(int i) {
+        final int newIndex = mCurrentIndex + i;
+        // Loop from first to last and vice versa.
+        mCurrentIndex = newIndex<0 ? mSongs.size()-1 : (newIndex>=mSongs.size() ? 0 : newIndex);
     }
 
     private void sendPlayerCommand(String action) {
