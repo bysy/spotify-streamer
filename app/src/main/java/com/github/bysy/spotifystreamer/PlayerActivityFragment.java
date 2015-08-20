@@ -102,6 +102,7 @@ public class PlayerActivityFragment extends Fragment {
     private void onPrevButtonClick() {
         Util.showToast(getActivity(), "Previous clicked");
         modifyCurrentIndex(-1);
+        setViewData();
         sendPlayerCommand(PlayerService.ACTION_CHANGE_SONG);
     }
 
@@ -112,6 +113,7 @@ public class PlayerActivityFragment extends Fragment {
     private void onNextButtonClick() {
         Util.showToast(getActivity(), "Next clicked");
         modifyCurrentIndex(1);
+        setViewData();
         sendPlayerCommand(PlayerService.ACTION_CHANGE_SONG);
     }
 
@@ -131,6 +133,12 @@ public class PlayerActivityFragment extends Fragment {
     }
 
     private void sendPlayerCommand(String action) {
+        // This method sends the full playlist each time. That's inefficient
+        // but it means we are in control of the position in the playlist
+        // no matter if the service has to be recreated without having
+        // to bind to it. As a half-way optimization, PlayerService only
+        // copies in the playlist when it has to be recreated. Otherwise,
+        // it retains the previous playlist.
         final Context appContext = getActivity().getApplicationContext();
         Intent playerIntent = new Intent(appContext, PlayerService.class);
         playerIntent.setAction(action);
