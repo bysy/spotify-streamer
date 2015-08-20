@@ -29,6 +29,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     private int mCurrentIndex = 0;
 
     public static final String ACTION_NEW_PLAYLIST = "ACTION_NEW_PLAYLIST";
+    public static final String ACTION_PREVIOUS = "ACTION_PREVIOUS";
+    public static final String ACTION_NEXT = "ACTION_NEXT";
 
     @Nullable
     @Override
@@ -45,6 +47,12 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             case ACTION_NEW_PLAYLIST:
                 success = handleNewPlaylist(intent);
                 break;
+            case ACTION_PREVIOUS:
+                success = handleSkip(-1);
+                break;
+            case ACTION_NEXT:
+                success = handleSkip(1);
+                break;
             default:
                 success = false;
         }
@@ -54,6 +62,14 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             Log.d(TAG, action.concat(": Failed"));
         }
         return mode;
+    }
+
+    private boolean handleSkip(int i) {
+        final int newIndex = mCurrentIndex + i;
+        // Loop from first to last and vice versa.
+        mCurrentIndex = newIndex<0 ? mSongs.size()-1 : (newIndex>=mSongs.size() ? 0 : newIndex);
+        mMediaPlayer.reset();
+        return prepareAndStart();
     }
 
     /** Start playing a new list of songs. Returns whether media player was correctly set up. */

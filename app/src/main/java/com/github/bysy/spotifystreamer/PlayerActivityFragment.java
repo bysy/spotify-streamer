@@ -4,6 +4,7 @@
 
 package com.github.bysy.spotifystreamer;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -69,6 +70,7 @@ public class PlayerActivityFragment extends Fragment {
 
     private void onPrevButtonClick() {
         Util.showToast(getActivity(), "Previous clicked");
+        sendPlayerCommand(PlayerService.ACTION_PREVIOUS);
     }
 
     private void onPlayButtonClick() {
@@ -77,6 +79,14 @@ public class PlayerActivityFragment extends Fragment {
 
     private void onNextButtonClick() {
         Util.showToast(getActivity(), "Next clicked");
+        sendPlayerCommand(PlayerService.ACTION_NEXT);
+    }
+
+    private void sendPlayerCommand(String action) {
+        final Context appContext = getActivity().getApplicationContext();
+        Intent playerIntent = new Intent(appContext, PlayerService.class);
+        playerIntent.setAction(action);
+        appContext.startService(playerIntent);
     }
 
     @Override
@@ -90,9 +100,10 @@ public class PlayerActivityFragment extends Fragment {
         if (savedInstanceState!=null) {
             return;
         }
-        Intent playerIntent = new Intent(getActivity().getApplicationContext(), PlayerService.class);
+        final Context appContext = getActivity().getApplicationContext();
+        Intent playerIntent = new Intent(appContext, PlayerService.class);
         playerIntent.setAction(PlayerService.ACTION_NEW_PLAYLIST);
         playerIntent.fillIn(in, 0);
-        getActivity().startService(playerIntent);
+        appContext.startService(playerIntent);
     }
 }
