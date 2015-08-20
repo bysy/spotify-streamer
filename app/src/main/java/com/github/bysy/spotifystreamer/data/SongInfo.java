@@ -13,8 +13,6 @@ import com.github.bysy.spotifystreamer.Util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import kaaes.spotify.webapi.android.models.Track;
 
@@ -75,9 +73,9 @@ public class SongInfo implements Parcelable {
 
     /** Create a list from Spotify Web Api tracks. */
     @NonNull
-    public static List<SongInfo> listOf(@Nullable Collection<Track> spotifyTracks) {
-        if (spotifyTracks==null) return Collections.emptyList();
-        List<SongInfo> songs = new ArrayList<>(spotifyTracks.size());
+    public static ArrayList<SongInfo> listOf(@Nullable Collection<Track> spotifyTracks) {
+        if (spotifyTracks==null) return new ArrayList<>();
+        ArrayList<SongInfo> songs = new ArrayList<>(spotifyTracks.size());
         for (Track t : spotifyTracks) {
             songs.add(valueOf(t));
         }

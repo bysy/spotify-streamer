@@ -121,7 +121,7 @@ public class TopSongsActivityFragment extends Fragment {
         spot.getArtistTopTrack(artistId, options, new Callback<Tracks>() {
             @Override
             public void success(final Tracks tracks, Response response) {
-                mSongs = new ArrayList<>(SongInfo.listOf(tracks.tracks));
+                mSongs = SongInfo.listOf(tracks.tracks);
                 if (mSongs.isEmpty()) {
                     Util.showToast(getActivity(), "No songs available for selected artist.");
                 }
