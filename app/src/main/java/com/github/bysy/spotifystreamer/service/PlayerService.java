@@ -30,6 +30,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     public static final String ACTION_NEW_PLAYLIST = "ACTION_NEW_PLAYLIST";
     public static final String ACTION_CHANGE_SONG = "ACTION_CHANGE_SONG";
+    public static final String ACTION_PAUSE = "ACTION_PAUSE";
+    public static final String ACTION_RESUME = "ACTION_RESUME";
 
     @Nullable
     @Override
@@ -48,6 +50,28 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 break;
             case ACTION_NEW_PLAYLIST:
                 success = handleNewPlaylist(intent);
+                break;
+            case ACTION_PAUSE:
+                success = true;
+                try {
+                    if (mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.pause();
+                    }
+                } catch (IllegalStateException e) {
+                    success = false;
+                    mMediaPlayer.reset();
+                }
+                break;
+            case ACTION_RESUME:
+                success = true;
+                try {
+                    if (!mMediaPlayer.isPlaying()) {
+                        mMediaPlayer.start();
+                    }
+                } catch (IllegalStateException e) {
+                    success = false;
+                    mMediaPlayer.reset();
+                }
                 break;
             case ACTION_NULL:
                 Log.d(TAG, "Intent is null. Nothing to do.");

@@ -7,6 +7,7 @@ package com.github.bysy.spotifystreamer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,16 +25,22 @@ import java.util.ArrayList;
  * Play a song.
  */
 public class PlayerActivityFragment extends Fragment {
-
+    // TODO: Refactor to use this class as a thin view controller.
+    //       Put player state in separate retained fragment.
+    //       That should allow binding to service, adding
+    //       callbacks and generally make things simpler.
     private static final String TAG = PlayerActivityFragment.class.getSimpleName();
     private static final String SONG_PARCEL_KEY = "SONG_PARCEL_KEY";
     private static final String CURRENT_INDEX_KEY = "CURRENT_INDEX_KEY";
+    private static final java.lang.String IS_PLAYING_KEY = "IS_PLAYING_KEY";
     private ImageView mAlbumImageView;
     private TextView mArtistTextView;
     private TextView mAlbumTextView;
     private TextView mSongTextView;
     private ArrayList<SongInfo> mSongs;
     private int mCurrentIndex;
+    private boolean mIsPlaying;
+    private ImageButton mPlayButton;
 
     public PlayerActivityFragment() {
     }
@@ -50,9 +57,11 @@ public class PlayerActivityFragment extends Fragment {
         if (savedInstanceState==null) {
             // first run
             mCurrentIndex = in.getIntExtra(TopSongsActivityFragment.Key.CURRENT_SONG, 0);
+            mIsPlaying = false;
         } else {
             // restore
             mCurrentIndex = savedInstanceState.getInt(CURRENT_INDEX_KEY);
+            mIsPlaying = savedInstanceState.getBoolean(IS_PLAYING_KEY);
         }
     }
 
@@ -61,6 +70,7 @@ public class PlayerActivityFragment extends Fragment {
         super.onSaveInstanceState(outState);
         //outState.putParcelableArrayList(SONG_PARCEL_KEY, mSongs);
         outState.putInt(CURRENT_INDEX_KEY, mCurrentIndex);
+        outState.putBoolean(IS_PLAYING_KEY, mIsPlaying);
     }
 
     @Override
@@ -75,7 +85,7 @@ public class PlayerActivityFragment extends Fragment {
 
         View buttonBar = view.findViewById(R.id.buttons);
         ImageButton prevButton = (ImageButton) buttonBar.findViewById(R.id.previousButton);
-        ImageButton playButton = (ImageButton) buttonBar.findViewById(R.id.playButton);
+        mPlayButton = (ImageButton) buttonBar.findViewById(R.id.playButton);
         ImageButton nextButton = (ImageButton) buttonBar.findViewById(R.id.nextButton);
 
         prevButton.setOnClickListener(new View.OnClickListener() {
@@ -84,7 +94,7 @@ public class PlayerActivityFragment extends Fragment {
                 onPrevButtonClick();
             }
         });
-        playButton.setOnClickListener(new View.OnClickListener() {
+        mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onPlayButtonClick();
@@ -99,6 +109,14 @@ public class PlayerActivityFragment extends Fragment {
         return view;
     }
 
+    private void setPlayButtonView() {
+        if (mIsPlaying) {
+            mPlayButton.setImageResource(R.drawable.pause_icon);
+        } else {
+            mPlayButton.setImageResource(R.drawable.play_icon);
+        }
+    }
+
     private void onPrevButtonClick() {
         Util.showToast(getActivity(), "Previous clicked");
         modifyCurrentIndex(-1);
@@ -108,6 +126,17 @@ public class PlayerActivityFragment extends Fragment {
 
     private void onPlayButtonClick() {
         Util.showToast(getActivity(), "Play clicked");
+        togglePlayState();
+        setPlayButtonView();
+    }
+
+    private void togglePlayState() {
+        if (mIsPlaying) {
+            sendPlayerCommand(PlayerService.ACTION_PAUSE);
+        } else {
+            sendPlayerCommand(PlayerService.ACTION_RESUME);
+        }
+        mIsPlaying = !mIsPlaying;
     }
 
     private void onNextButtonClick() {
@@ -115,6 +144,8 @@ public class PlayerActivityFragment extends Fragment {
         modifyCurrentIndex(1);
         setViewData();
         sendPlayerCommand(PlayerService.ACTION_CHANGE_SONG);
+        mIsPlaying = true;
+        setPlayButtonView();
     }
 
     private void setViewData() {
@@ -157,5 +188,17 @@ public class PlayerActivityFragment extends Fragment {
             return;
         }
         sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
+        mIsPlaying = true;
+        // Be all cute and delay showing the pause icon. Really, it should
+        // be swapped in via the onPrepared() callback. Requires binding
+        // to the service.
+        final int delayMS = 500;
+        new Handler().postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        setPlayButtonView();
+                    }
+                }, delayMS);
     }
 }

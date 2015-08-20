@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2015. bysy@users.noreply.github.com
+  -->
+
+<resources>
+    <drawable name="pause_icon">@android:drawable/ic_media_pause</drawable>
+    <drawable name="play_icon">@android:drawable/ic_media_play</drawable>
+</resources>
