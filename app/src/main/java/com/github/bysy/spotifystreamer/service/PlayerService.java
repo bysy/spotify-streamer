@@ -22,6 +22,7 @@ import java.util.ArrayList;
  * Provide a service to stream songs.
  */
 public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+    private static final String ACTION_NULL = "ACTION_NULL";
     private static String TAG = PlayerService.class.getSimpleName();
     private ArrayList<SongInfo> mSongs;
     private MediaPlayer mMediaPlayer;
@@ -42,7 +43,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public int onStartCommand(Intent intent, int flags, int startId) {
         final int mode = START_STICKY;
         boolean success;
-        final String action = intent.getAction();
+        final String action = intent==null ? ACTION_NULL : intent.getAction();
         switch (action) {
             case ACTION_NEW_PLAYLIST:
                 success = handleNewPlaylist(intent);
@@ -52,6 +53,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 break;
             case ACTION_NEXT:
                 success = handleSkip(1);
+                break;
+            case ACTION_NULL:
+                Log.d(TAG, "Intent is null. Nothing to do.");
+                success = true;
                 break;
             default:
                 success = false;
