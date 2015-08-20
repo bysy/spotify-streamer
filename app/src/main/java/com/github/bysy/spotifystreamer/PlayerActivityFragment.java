@@ -73,11 +73,6 @@ public class PlayerActivityFragment extends Fragment {
         mAlbumTextView = (TextView) view.findViewById(R.id.albumNameView);
         mSongTextView = (TextView) view.findViewById(R.id.songNameView);
 
-        final SongInfo currentSong = mSongs.get(mCurrentIndex);
-        mArtistTextView.setText(currentSong.primaryArtistName);
-        mAlbumTextView.setText(currentSong.albumName);
-        mSongTextView.setText(currentSong.name);
-
         View buttonBar = view.findViewById(R.id.buttons);
         ImageButton prevButton = (ImageButton) buttonBar.findViewById(R.id.previousButton);
         ImageButton playButton = (ImageButton) buttonBar.findViewById(R.id.playButton);
@@ -120,6 +115,15 @@ public class PlayerActivityFragment extends Fragment {
         sendPlayerCommand(PlayerService.ACTION_CHANGE_SONG);
     }
 
+    private void setViewData() {
+        final SongInfo currentSong = mSongs.get(mCurrentIndex);
+        mArtistTextView.setText(currentSong.primaryArtistName);
+        mAlbumTextView.setText(currentSong.albumName);
+        mSongTextView.setText(currentSong.name);
+        final String imageUrl = currentSong.albumImageUrl;
+        Util.loadImageInto(getActivity(), imageUrl, mAlbumImageView);
+    }
+
     private void modifyCurrentIndex(int i) {
         final int newIndex = mCurrentIndex + i;
         // Loop from first to last and vice versa.
@@ -130,23 +134,20 @@ public class PlayerActivityFragment extends Fragment {
         final Context appContext = getActivity().getApplicationContext();
         Intent playerIntent = new Intent(appContext, PlayerService.class);
         playerIntent.setAction(action);
+        playerIntent.putExtra(TopSongsActivityFragment.Key.CURRENT_SONG, mCurrentIndex);
+        playerIntent.putExtra(TopSongsActivityFragment.Key.SONGS_PARCEL, mSongs);
         appContext.startService(playerIntent);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        String imageUrl = mSongs.get(mCurrentIndex).albumImageUrl;
-        Util.loadImageInto(getActivity(), imageUrl, mAlbumImageView);
+        setViewData();
 
         // Don't start another player when the orientation etc changes.
         if (savedInstanceState!=null) {
             return;
         }
-        final Context appContext = getActivity().getApplicationContext();
-        Intent playerIntent = new Intent(appContext, PlayerService.class);
-        playerIntent.setAction(PlayerService.ACTION_NEW_PLAYLIST);
-        playerIntent.fillIn(getActivity().getIntent(), 0);
-        appContext.startService(playerIntent);
+        sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
     }
 }
