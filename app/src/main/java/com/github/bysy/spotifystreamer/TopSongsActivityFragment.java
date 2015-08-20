@@ -41,12 +41,6 @@ import retrofit.client.Response;
  */
 public class TopSongsActivityFragment extends Fragment {
     public static class Key {
-        public static final String SONG_ID = "SONG_ID";
-        public static final String SONG_NAME = "SONG_NAME";
-        public static final String SONG_PREVIEW_URL = "SONG_PREVIEW_URL";
-        public static final String ALBUM_IMAGE_URL = "ALBUM_IMAGE_URL";
-        public static final String ARTIST_NAME = "ARTIST_NAME";
-        public static final String ALBUM_NAME = "ALBUM_NAME";
         public static final String SONGS_PARCEL = "SONGS_PARCEL";
         public static final String CURRENT_SONG = "CURRENT_SONG";
     }
@@ -94,16 +88,8 @@ public class TopSongsActivityFragment extends Fragment {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Open player activity for this song
-                SongInfo song = (SongInfo) parent.getItemAtPosition(position);
-
+                // Open player activity at this song
                 Intent i = new Intent(getActivity(), PlayerActivity.class);
-                i.putExtra(Key.SONG_ID, song.id);
-                i.putExtra(Key.ARTIST_NAME, song.primaryArtistName);
-                i.putExtra(Key.ALBUM_NAME, song.albumName);
-                i.putExtra(Key.SONG_NAME, song.name);
-                i.putExtra(Key.SONG_PREVIEW_URL, song.previewUrl);
-                i.putExtra(Key.ALBUM_IMAGE_URL, song.albumImageUrl);
                 i.putExtra(Key.SONGS_PARCEL, mSongs);
                 i.putExtra(Key.CURRENT_SONG, position);
                 startActivity(i);

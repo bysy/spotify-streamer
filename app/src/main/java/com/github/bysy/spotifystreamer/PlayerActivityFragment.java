@@ -15,7 +15,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.github.bysy.spotifystreamer.data.SongInfo;
 import com.github.bysy.spotifystreamer.service.PlayerService;
+
+import java.util.ArrayList;
 
 /**
  * Play a song.
@@ -23,9 +26,41 @@ import com.github.bysy.spotifystreamer.service.PlayerService;
 public class PlayerActivityFragment extends Fragment {
 
     private static final String TAG = PlayerActivityFragment.class.getSimpleName();
+    private static final String SONG_PARCEL_KEY = "SONG_PARCEL_KEY";
+    private static final String CURRENT_INDEX_KEY = "CURRENT_INDEX_KEY";
     private ImageView mAlbumImageView;
+    private TextView mArtistTextView;
+    private TextView mAlbumTextView;
+    private TextView mSongTextView;
+    private ArrayList<SongInfo> mSongs;
+    private int mCurrentIndex;
 
     public PlayerActivityFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Intent in = getActivity().getIntent();
+        if (in==null) {
+            return;
+        }
+        // TODO: Check if intent is retained
+        mSongs = in.getParcelableArrayListExtra(TopSongsActivityFragment.Key.SONGS_PARCEL);
+        if (savedInstanceState==null) {
+            // first run
+            mCurrentIndex = in.getIntExtra(TopSongsActivityFragment.Key.CURRENT_SONG, 0);
+        } else {
+            // restore
+            mCurrentIndex = savedInstanceState.getInt(CURRENT_INDEX_KEY);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //outState.putParcelableArrayList(SONG_PARCEL_KEY, mSongs);
+        outState.putInt(CURRENT_INDEX_KEY, mCurrentIndex);
     }
 
     @Override
@@ -34,13 +69,14 @@ public class PlayerActivityFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         mAlbumImageView = (ImageView) view.findViewById(R.id.playerAlbumImage);
 
-        Intent in = getActivity().getIntent();
-        TextView artistTextView = (TextView) view.findViewById(R.id.artistNameView);
-        artistTextView.setText(in.getStringExtra(TopSongsActivityFragment.Key.ARTIST_NAME));
-        TextView albumTextView = (TextView) view.findViewById(R.id.albumNameView);
-        albumTextView.setText(in.getStringExtra(TopSongsActivityFragment.Key.ALBUM_NAME));
-        TextView songTextView = (TextView) view.findViewById(R.id.songNameView);
-        songTextView.setText(in.getStringExtra(TopSongsActivityFragment.Key.SONG_NAME));
+        mArtistTextView = (TextView) view.findViewById(R.id.artistNameView);
+        mAlbumTextView = (TextView) view.findViewById(R.id.albumNameView);
+        mSongTextView = (TextView) view.findViewById(R.id.songNameView);
+
+        final SongInfo currentSong = mSongs.get(mCurrentIndex);
+        mArtistTextView.setText(currentSong.primaryArtistName);
+        mAlbumTextView.setText(currentSong.albumName);
+        mSongTextView.setText(currentSong.name);
 
         View buttonBar = view.findViewById(R.id.buttons);
         ImageButton prevButton = (ImageButton) buttonBar.findViewById(R.id.previousButton);
@@ -92,8 +128,7 @@ public class PlayerActivityFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Intent in = getActivity().getIntent();
-        String imageUrl = in.getStringExtra(TopSongsActivityFragment.Key.ALBUM_IMAGE_URL);
+        String imageUrl = mSongs.get(mCurrentIndex).albumImageUrl;
         Util.loadImageInto(getActivity(), imageUrl, mAlbumImageView);
 
         // Don't start another player when the orientation etc changes.
@@ -103,7 +138,7 @@ public class PlayerActivityFragment extends Fragment {
         final Context appContext = getActivity().getApplicationContext();
         Intent playerIntent = new Intent(appContext, PlayerService.class);
         playerIntent.setAction(PlayerService.ACTION_NEW_PLAYLIST);
-        playerIntent.fillIn(in, 0);
+        playerIntent.fillIn(getActivity().getIntent(), 0);
         appContext.startService(playerIntent);
     }
 }
