@@ -5,11 +5,8 @@
 package com.github.bysy.spotifystreamer;
 
 import android.content.Intent;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,12 +14,12 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.IOException;
+import com.github.bysy.spotifystreamer.service.PlayerService;
 
 /**
  * Play a song.
  */
-public class PlayerActivityFragment extends Fragment implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+public class PlayerActivityFragment extends Fragment {
 
     private static final String TAG = PlayerActivityFragment.class.getSimpleName();
     private ImageView mAlbumImageView;
@@ -93,31 +90,9 @@ public class PlayerActivityFragment extends Fragment implements MediaPlayer.OnPr
         if (savedInstanceState!=null) {
             return;
         }
-        String previewUrl = in.getStringExtra(TopSongsActivityFragment.Key.SONG_PREVIEW_URL);
-        if (previewUrl==null) {
-            return;
-        }
-        MediaPlayer player = new MediaPlayer();
-        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        Log.d(TAG, "Trying to play ".concat(previewUrl));
-        try {
-            player.setDataSource(previewUrl);
-        } catch (IOException e) {
-            Log.e(TAG, "Setting of preview url failed.");
-            e.printStackTrace();
-        }
-        player.setOnPreparedListener(this);
-        player.setOnCompletionListener(this);
-        player.prepareAsync();
-    }
-
-    @Override
-    public void onPrepared(MediaPlayer mp) {
-        mp.start();
-    }
-
-    @Override
-    public void onCompletion(MediaPlayer mp) {
-        mp.release();
+        Intent playerIntent = new Intent(getActivity().getApplicationContext(), PlayerService.class);
+        playerIntent.setAction(PlayerService.ACTION_NEW_PLAYLIST);
+        playerIntent.fillIn(in, 0);
+        getActivity().startService(playerIntent);
     }
 }

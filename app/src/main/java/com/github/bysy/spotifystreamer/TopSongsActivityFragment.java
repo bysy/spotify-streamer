@@ -40,7 +40,7 @@ import retrofit.client.Response;
  * Fragment to show the top songs of an artist.
  */
 public class TopSongsActivityFragment extends Fragment {
-    static class Key {
+    public static class Key {
         public static final String SONG_ID = "SONG_ID";
         public static final String SONG_NAME = "SONG_NAME";
         public static final String SONG_PREVIEW_URL = "SONG_PREVIEW_URL";
@@ -48,6 +48,7 @@ public class TopSongsActivityFragment extends Fragment {
         public static final String ARTIST_NAME = "ARTIST_NAME";
         public static final String ALBUM_NAME = "ALBUM_NAME";
         public static final String SONGS_PARCEL = "SONGS_PARCEL";
+        public static final String CURRENT_SONG = "CURRENT_SONG";
     }
     static private final String TAG = TopSongsActivityFragment.class.getSimpleName();
     private SongsAdapter mAdapter;
@@ -103,6 +104,8 @@ public class TopSongsActivityFragment extends Fragment {
                 i.putExtra(Key.SONG_NAME, song.name);
                 i.putExtra(Key.SONG_PREVIEW_URL, song.previewUrl);
                 i.putExtra(Key.ALBUM_IMAGE_URL, song.albumImageUrl);
+                i.putExtra(Key.SONGS_PARCEL, mSongs);
+                i.putExtra(Key.CURRENT_SONG, position);
                 startActivity(i);
             }
         });
