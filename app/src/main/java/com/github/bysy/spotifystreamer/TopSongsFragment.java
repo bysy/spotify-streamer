@@ -65,10 +65,10 @@ public class TopSongsFragment extends Fragment {
         mSongs = new ArrayList<>(10);
         mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
         // First run: Query Spotify
-        Intent in = getActivity().getIntent();
-        String artistId = in.getStringExtra(MainActivity.Key.ARTIST_ID);
+        Bundle args = getArguments();
+        String artistId = (args==null) ? null : args.getString(MainActivity.Key.ARTIST_ID);
         if (artistId==null || artistId.isEmpty()) {
-            Log.e(TAG, MainActivity.Key.ARTIST_ID + " is missing");
+            Log.e(TAG, "Require argument bundle with " + MainActivity.Key.ARTIST_ID + " K-V pair");
             return;
         }
         updateSongs(artistId);

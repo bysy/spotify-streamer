@@ -32,8 +32,17 @@ public class TopSongsActivity extends AppCompatActivity {
         if (ab!=null) {
             ab.setTitle(name);
         }
+        String id = in.getStringExtra(MainActivity.Key.ARTIST_ID);
+        if (id==null || id.isEmpty()) {
+            Log.e(TAG, MainActivity.Key.ARTIST_ID.concat(" is missing"));
+            return;
+        }
+        TopSongsFragment fragment = new TopSongsFragment();
+        Bundle args = new Bundle();
+        args.putString(MainActivity.Key.ARTIST_ID, id);
+        fragment.setArguments(args);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.top_songs_container, new TopSongsFragment())
+                .replace(R.id.top_songs_container, fragment)
                 .commit();
     }
 
