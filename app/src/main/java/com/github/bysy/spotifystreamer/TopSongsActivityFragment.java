@@ -66,9 +66,9 @@ public class TopSongsActivityFragment extends Fragment {
         mAdapter = new SongsAdapter(getActivity(), R.layout.song_list_item, mSongs);
         // First run: Query Spotify
         Intent in = getActivity().getIntent();
-        String artistId = in.getStringExtra(SearchActivity.Key.ARTIST_ID);
+        String artistId = in.getStringExtra(MainActivity.Key.ARTIST_ID);
         if (artistId==null || artistId.isEmpty()) {
-            Log.e(TAG, SearchActivity.Key.ARTIST_ID + " is missing");
+            Log.e(TAG, MainActivity.Key.ARTIST_ID + " is missing");
             return;
         }
         updateSongs(artistId);

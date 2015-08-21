@@ -98,8 +98,8 @@ public class SearchActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Artist x = (Artist) parent.getItemAtPosition(position);
                 Intent i = new Intent(getActivity(), TopSongsActivity.class);
-                i.putExtra(SearchActivity.Key.ARTIST_NAME, x.name);
-                i.putExtra(SearchActivity.Key.ARTIST_ID, x.id);
+                i.putExtra(MainActivity.Key.ARTIST_NAME, x.name);
+                i.putExtra(MainActivity.Key.ARTIST_ID, x.id);
                 startActivity(i);
             }
         });

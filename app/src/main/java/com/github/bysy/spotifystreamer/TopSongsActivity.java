@@ -21,10 +21,10 @@ public class TopSongsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_songs);
         Intent in = getIntent();
-        String name = in.getStringExtra(SearchActivity.Key.ARTIST_NAME);
+        String name = in.getStringExtra(MainActivity.Key.ARTIST_NAME);
         if (name==null) name = "";
         if (name.isEmpty()) {
-            Log.e(TAG, SearchActivity.Key.ARTIST_NAME + " is missing");
+            Log.e(TAG, MainActivity.Key.ARTIST_NAME + " is missing");
             name = getString(R.string.app_name);
         }
         ActionBar ab = getSupportActionBar();

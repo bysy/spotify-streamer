@@ -11,7 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class SearchActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
     static class Key {
         static final String ARTIST_NAME = "ARTIST_NAME";
         static final String ARTIST_ID = "ARTIST_ID";
@@ -20,7 +20,7 @@ public class SearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
+        setContentView(R.layout.activity_main);
     }
 
     @Override
