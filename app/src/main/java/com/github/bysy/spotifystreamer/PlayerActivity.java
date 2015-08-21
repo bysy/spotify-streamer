@@ -10,6 +10,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.github.bysy.spotifystreamer.data.SongInfo;
+
+import java.util.ArrayList;
+
 /** Play a song. */
 public class PlayerActivity extends AppCompatActivity {
 
@@ -17,6 +21,18 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+        final Intent in = getIntent();
+        final ArrayList<SongInfo> songs =
+                in.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);
+        final int currentIndex = in.getIntExtra(TopSongsFragment.Key.CURRENT_SONG, 0);
+        Bundle args = new Bundle();
+        args.putParcelableArrayList(TopSongsFragment.Key.SONGS_PARCEL, songs);
+        args.putInt(TopSongsFragment.Key.CURRENT_SONG, currentIndex);
+        PlayerFragment playerFragment = new PlayerFragment();
+        playerFragment.setArguments(args);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.player_container, playerFragment)
+                .commit();
     }
 
 

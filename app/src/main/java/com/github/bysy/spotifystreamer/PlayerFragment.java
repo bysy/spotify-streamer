@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,15 +49,19 @@ public class PlayerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent in = getActivity().getIntent();
-        if (in==null) {
-            return;
+        Bundle args = getArguments();
+        if (args!=null) {
+            mSongs = args.getParcelableArrayList(TopSongsFragment.Key.SONGS_PARCEL);
+        } else {
+            mSongs = null;
         }
-        // TODO: Check if intent is retained
-        mSongs = in.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);
+        if (mSongs==null) {
+            Log.e(TAG, "Created without songs argument.");
+        }
+
         if (savedInstanceState==null) {
             // first run
-            mCurrentIndex = in.getIntExtra(TopSongsFragment.Key.CURRENT_SONG, 0);
+            mCurrentIndex = (args==null) ? -1 : args.getInt(TopSongsFragment.Key.CURRENT_SONG, 0);
             mIsPlaying = false;
         } else {
             // restore
