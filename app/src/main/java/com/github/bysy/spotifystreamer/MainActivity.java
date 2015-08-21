@@ -20,19 +20,33 @@ public class MainActivity extends AppCompatActivity
         static final String ARTIST_NAME = "ARTIST_NAME";
         static final String ARTIST_ID = "ARTIST_ID";
     }
+    private static final String DETAIL_FRAGMENT_TAG = "DETAIL_FRAGMENT_TAG";
+
+    private boolean mIsMultiPane = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mIsMultiPane = findViewById(R.id.multipane_detail_container)!=null;
     }
 
     @Override
     public void onArtistSelected(Artist artist) {
-        Intent i = new Intent(this, TopSongsActivity.class);
-        i.putExtra(Key.ARTIST_NAME, artist.name);
-        i.putExtra(Key.ARTIST_ID, artist.id);
-        startActivity(i);
+        if (mIsMultiPane) {
+            TopSongsFragment detailFragment = new TopSongsFragment();
+            Bundle args = new Bundle();
+            args.putString(Key.ARTIST_ID, artist.id);
+            detailFragment.setArguments(args);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.multipane_detail_container, detailFragment, DETAIL_FRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent i = new Intent(this, TopSongsActivity.class);
+            i.putExtra(Key.ARTIST_NAME, artist.name);
+            i.putExtra(Key.ARTIST_ID, artist.id);
+            startActivity(i);
+        }
     }
 
     @Override
