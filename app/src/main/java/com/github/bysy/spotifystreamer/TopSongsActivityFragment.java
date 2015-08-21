@@ -7,6 +7,7 @@ package com.github.bysy.spotifystreamer;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -103,7 +104,7 @@ public class TopSongsActivityFragment extends Fragment {
         Log.d(TAG, "Searching for ID: ".concat(artistId));
         SpotifyApi spotApi = new SpotifyApi();
         SpotifyService spot = spotApi.getService();
-        final String country = Util.getCountryCode();
+        final String country = getPreferredCountryCode();
         Log.d(TAG, "Country is ".concat(country));
         Map<String,Object> options = new HashMap<>();
         options.put("country", country);
@@ -124,6 +125,22 @@ public class TopSongsActivityFragment extends Fragment {
                 Util.showToast(getActivity(), "Couldn't connect to Spotify");
             }
         });
+    }
+
+    /**
+     * Return preferred country code. Specifically, returns the first non-empty value
+     * of Custom CC > Default CC > "US"
+     */
+    private String getPreferredCountryCode() {
+        final Context context = getActivity();
+        final String locale_key = context.getString(R.string.pref_locale_key);
+        final String custom_locale = PreferenceManager.getDefaultSharedPreferences(context)
+                .getString(locale_key, "");
+        if (!custom_locale.isEmpty()) {
+            return custom_locale;
+        } else {
+            return Util.getCountryCode();
+        }
     }
 
 
