@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
+/** Activity to show top songs. Used in single-pane layout mode. */
 public class TopSongsActivity extends AppCompatActivity {
     private static final String TAG = TopSongsActivity.class.getSimpleName();
 
@@ -31,6 +32,9 @@ public class TopSongsActivity extends AppCompatActivity {
         if (ab!=null) {
             ab.setTitle(name);
         }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.top_songs_container, new TopSongsFragment())
+                .commit();
     }
 
 
