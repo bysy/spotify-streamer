@@ -22,7 +22,6 @@ import android.widget.TextView;
 
 import com.github.bysy.spotifystreamer.data.SongInfo;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -180,7 +179,7 @@ public class TopSongsFragment extends Fragment {
                 songName = (TextView) view.findViewById(R.id.songNameView);
 
                 if (!isInitialized()) {
-                    throw new InvalidParameterException("Invalid layout");
+                    throw new IllegalArgumentException("Invalid layout");
                 }
             }
 

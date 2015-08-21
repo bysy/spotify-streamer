@@ -24,7 +24,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -253,7 +252,7 @@ public class ArtistSearchFragment extends Fragment {
                 artistImage = (ImageView) view.findViewById(R.id.artistImageView);
                 artistName = (TextView) view.findViewById(R.id.artistNameView);
                 if (!isInitialized()) {
-                    throw new InvalidParameterException("Invalid layout");
+                    throw new IllegalArgumentException("Invalid layout");
                 }
             }
 
