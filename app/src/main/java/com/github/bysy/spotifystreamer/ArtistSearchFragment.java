@@ -43,12 +43,12 @@ import retrofit.client.Response;
 /**
  * Search for and display artists.
  */
-public class SearchActivityFragment extends Fragment {
+public class ArtistSearchFragment extends Fragment {
     private static class Key {
         private static final String SHOULD_SEARCH = "SHOULD_SEARCH";
         private static final String SEARCH_TEXT = "SEARCH_TEXT";
     }
-    private static final String TAG = SearchActivityFragment.class.getSimpleName();
+    private static final String TAG = ArtistSearchFragment.class.getSimpleName();
 
     private ListView mArtistsListView;
     private EditText mSearchText;
@@ -58,7 +58,7 @@ public class SearchActivityFragment extends Fragment {
     private String mLastSearch;
     private int mLastTotal;
 
-    public SearchActivityFragment() {
+    public ArtistSearchFragment() {
     }
 
     @Override
@@ -88,7 +88,7 @@ public class SearchActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_search, container, false);
+        View view = inflater.inflate(R.layout.fragment_artist_search, container, false);
 
         mArtistsListView = (ListView) view.findViewById(R.id.artistListView);
         mArtistsListView.setAdapter(mAdapter);
@@ -228,7 +228,7 @@ public class SearchActivityFragment extends Fragment {
             }
             if (position==(getCount()-1-5)) {  // 5 before last makes for smoother scrolling
                 Log.d(TAG, "retrieving more artists at position " + Integer.toString(position));
-                SearchActivityFragment.this.retrieveMoreArtists();
+                ArtistSearchFragment.this.retrieveMoreArtists();
             }
             ViewHolder views = (ViewHolder) item.getTag();
             Artist artist = getItem(position);

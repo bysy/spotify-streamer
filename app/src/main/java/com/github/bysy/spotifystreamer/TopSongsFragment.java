@@ -40,16 +40,16 @@ import retrofit.client.Response;
 /**
  * Fragment to show the top songs of an artist.
  */
-public class TopSongsActivityFragment extends Fragment {
+public class TopSongsFragment extends Fragment {
     public static class Key {
         public static final String SONGS_PARCEL = "SONGS_PARCEL";
         public static final String CURRENT_SONG = "CURRENT_SONG";
     }
-    static private final String TAG = TopSongsActivityFragment.class.getSimpleName();
+    static private final String TAG = TopSongsFragment.class.getSimpleName();
     private SongsAdapter mAdapter;
     private ArrayList<SongInfo> mSongs;
 
-    public TopSongsActivityFragment() {
+    public TopSongsFragment() {
     }
 
     @Override

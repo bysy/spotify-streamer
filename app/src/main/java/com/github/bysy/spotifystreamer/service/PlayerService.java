@@ -12,7 +12,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.github.bysy.spotifystreamer.TopSongsActivityFragment;
+import com.github.bysy.spotifystreamer.TopSongsFragment;
 import com.github.bysy.spotifystreamer.data.SongInfo;
 
 import java.io.IOException;
@@ -94,9 +94,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         } else {
             mMediaPlayer.reset();
         }
-        mCurrentIndex = intent.getIntExtra(TopSongsActivityFragment.Key.CURRENT_SONG, 0);
+        mCurrentIndex = intent.getIntExtra(TopSongsFragment.Key.CURRENT_SONG, 0);
         if (mSongs==null) {
-            mSongs = intent.getParcelableArrayListExtra(TopSongsActivityFragment.Key.SONGS_PARCEL);
+            mSongs = intent.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);
             if (mSongs==null || mSongs.isEmpty()) {
                 return false;
             }
@@ -106,7 +106,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     /** Start playing a new list of songs. Returns whether media player was correctly set up. */
     private boolean handleNewPlaylist(Intent intent) {
-        mSongs = intent.getParcelableArrayListExtra(TopSongsActivityFragment.Key.SONGS_PARCEL);
+        mSongs = intent.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);
         return initializeIfNecessary(intent) && prepareAndStart();
     }
 

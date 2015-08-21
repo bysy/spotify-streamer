@@ -24,12 +24,12 @@ import java.util.ArrayList;
 /**
  * Play a song.
  */
-public class PlayerActivityFragment extends Fragment {
+public class PlayerFragment extends Fragment {
     // TODO: Refactor to use this class as a thin view controller.
     //       Put player state in separate retained fragment.
     //       That should allow binding to service, adding
     //       callbacks and generally make things simpler.
-    private static final String TAG = PlayerActivityFragment.class.getSimpleName();
+    private static final String TAG = PlayerFragment.class.getSimpleName();
     private static final String SONG_PARCEL_KEY = "SONG_PARCEL_KEY";
     private static final String CURRENT_INDEX_KEY = "CURRENT_INDEX_KEY";
     private static final java.lang.String IS_PLAYING_KEY = "IS_PLAYING_KEY";
@@ -42,7 +42,7 @@ public class PlayerActivityFragment extends Fragment {
     private boolean mIsPlaying;
     private ImageButton mPlayButton;
 
-    public PlayerActivityFragment() {
+    public PlayerFragment() {
     }
 
     @Override
@@ -53,10 +53,10 @@ public class PlayerActivityFragment extends Fragment {
             return;
         }
         // TODO: Check if intent is retained
-        mSongs = in.getParcelableArrayListExtra(TopSongsActivityFragment.Key.SONGS_PARCEL);
+        mSongs = in.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);
         if (savedInstanceState==null) {
             // first run
-            mCurrentIndex = in.getIntExtra(TopSongsActivityFragment.Key.CURRENT_SONG, 0);
+            mCurrentIndex = in.getIntExtra(TopSongsFragment.Key.CURRENT_SONG, 0);
             mIsPlaying = false;
         } else {
             // restore
@@ -173,8 +173,8 @@ public class PlayerActivityFragment extends Fragment {
         final Context appContext = getActivity().getApplicationContext();
         Intent playerIntent = new Intent(appContext, PlayerService.class);
         playerIntent.setAction(action);
-        playerIntent.putExtra(TopSongsActivityFragment.Key.CURRENT_SONG, mCurrentIndex);
-        playerIntent.putExtra(TopSongsActivityFragment.Key.SONGS_PARCEL, mSongs);
+        playerIntent.putExtra(TopSongsFragment.Key.CURRENT_SONG, mCurrentIndex);
+        playerIntent.putExtra(TopSongsFragment.Key.SONGS_PARCEL, mSongs);
         appContext.startService(playerIntent);
     }
 

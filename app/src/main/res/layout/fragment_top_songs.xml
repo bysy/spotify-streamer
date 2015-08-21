@@ -8,7 +8,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="0dp"
     android:paddingBottom="0dp"
-    tools:context="com.github.bysy.spotifystreamer.TopSongsActivityFragment">
+    tools:context="com.github.bysy.spotifystreamer.TopSongsFragment">
 
     <ListView
         android:layout_width="match_parent"
