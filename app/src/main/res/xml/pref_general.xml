@@ -1,0 +1,21 @@
+<!--
+  ~ Copyright (c) 2015. bysy@users.noreply.github.com
+  -->
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="@string/pref_notification_key"
+        android:title="Show player notification"
+        android:summary="When enabled you can control the player from the notification drawer"
+        android:defaultValue="true" />
+    <EditTextPreference
+        android:key="@string/pref_locale_key"
+        android:title="Custom locale"
+        android:defaultValue=""
+        android:selectAllOnFocus="true"
+        android:inputType="textCapCharacters"
+        android:singleLine="true"
+        android:maxLines="1" />
+
+</PreferenceScreen>

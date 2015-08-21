@@ -8,4 +8,8 @@
     <string name="title_activity_top_songs">TopSongsActivity</string>
     <string name="searchHint">Search artist</string>
     <string name="title_activity_player">PlayerActivity</string>
+
+    <string name="pref_notification_key">notification</string>
+    <string name="pref_locale_key">locale</string>
+    <string name="title_activity_settings">Settings</string>
 </resources>
