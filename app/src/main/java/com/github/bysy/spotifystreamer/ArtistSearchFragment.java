@@ -6,7 +6,6 @@ package com.github.bysy.spotifystreamer;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -41,7 +40,9 @@ import retrofit.client.Response;
 
 
 /**
- * Search for and display artists.
+ * Search for and display artists. Parent activity should implement
+ * OnArtistSelected interface to receive callbacks when an
+ * artist is selected.
  */
 public class ArtistSearchFragment extends Fragment {
     private static class Key {
@@ -57,6 +58,10 @@ public class ArtistSearchFragment extends Fragment {
     private final SpotifyApi mSpotApi = new SpotifyApi();
     private String mLastSearch;
     private int mLastTotal;
+
+    interface OnArtistSelected {
+        void onArtistSelected(Artist artist);
+    }
 
     public ArtistSearchFragment() {
     }
@@ -95,12 +100,14 @@ public class ArtistSearchFragment extends Fragment {
 
         mArtistsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Artist x = (Artist) parent.getItemAtPosition(position);
-                Intent i = new Intent(getActivity(), TopSongsActivity.class);
-                i.putExtra(MainActivity.Key.ARTIST_NAME, x.name);
-                i.putExtra(MainActivity.Key.ARTIST_ID, x.id);
-                startActivity(i);
+            public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
+                final Activity parentActivity = getActivity();
+                if (parentActivity instanceof OnArtistSelected) {
+                    final Artist artist = (Artist) parentAdapter.getItemAtPosition(position);
+                    ((OnArtistSelected) parentActivity).onArtistSelected(artist);
+                } else {
+                    Log.d(TAG, "Containing activity should implement OnArtistSelected");
+                }
             }
         });
         mSearchText = (EditText) view.findViewById(R.id.searchText);

@@ -10,8 +10,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import kaaes.spotify.webapi.android.models.Artist;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity
+        implements ArtistSearchFragment.OnArtistSelected {
+
     static class Key {
         static final String ARTIST_NAME = "ARTIST_NAME";
         static final String ARTIST_ID = "ARTIST_ID";
@@ -21,6 +25,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    public void onArtistSelected(Artist artist) {
+        Intent i = new Intent(this, TopSongsActivity.class);
+        i.putExtra(Key.ARTIST_NAME, artist.name);
+        i.putExtra(Key.ARTIST_ID, artist.id);
+        startActivity(i);
     }
 
     @Override
