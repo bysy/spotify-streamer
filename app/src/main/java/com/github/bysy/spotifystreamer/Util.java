@@ -6,14 +6,17 @@ package com.github.bysy.spotifystreamer;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Patterns;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,6 +27,19 @@ import kaaes.spotify.webapi.android.models.Image;
  * Utilities.
  */
 public class Util {
+    /** Add all values to adapter. Side-effect pre-honeycomb: always calls notifyDataSetChanged() */
+    static <T> void adapterAddAll(ArrayAdapter<T> adapter, Collection<T> values) {
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.HONEYCOMB) {
+            adapter.addAll(values);
+        } else {
+            adapter.setNotifyOnChange(false);
+            for (T x : values) {
+                adapter.add(x);
+            }
+            adapter.notifyDataSetChanged();  // Also sets notifyOnChange to true again
+        }
+    }
+
     /** Return the two character ISO code for user's preferred locale or "US" if not available. */
     static String getCountryCode() {
         String res = Locale.getDefault().getCountry();

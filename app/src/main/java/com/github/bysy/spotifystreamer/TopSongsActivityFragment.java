@@ -4,11 +4,11 @@
 
 package com.github.bysy.spotifystreamer;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -115,7 +115,7 @@ public class TopSongsActivityFragment extends Fragment {
                     Util.showToast(getActivity(), "No songs available for selected artist.");
                 }
                 mAdapter.clear();
-                mAdapter.addAll(mSongs);
+                Util.adapterAddAll(mAdapter, mSongs);
             }
 
             @Override
