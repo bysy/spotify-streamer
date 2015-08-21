@@ -24,6 +24,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.bysy.spotifystreamer.data.ArtistInfo;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +33,6 @@ import java.util.Map;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -52,14 +53,14 @@ public class ArtistSearchFragment extends Fragment {
 
     private ListView mArtistsListView;
     private EditText mSearchText;
-    private List<Artist> mArtists = new ArrayList<>();
+    private List<ArtistInfo> mArtists = new ArrayList<>();
     private ArtistAdapter mAdapter;
     private final SpotifyApi mSpotApi = new SpotifyApi();
     private String mLastSearch;
     private int mLastTotal;
 
     interface OnArtistSelected {
-        void onArtistSelected(Artist artist);
+        void onArtistSelected(ArtistInfo artist);
     }
 
     public ArtistSearchFragment() {
@@ -68,7 +69,7 @@ public class ArtistSearchFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);  // TODO: Move expensive state (SpotifyApi) to non-UI fragment as per recommendation.
+        setRetainInstance(true);  // TODO: Move expensive state (artist list, SpotifyApi) to non-UI fragment as per recommendation.
         mAdapter = new ArtistAdapter(getActivity(), R.layout.single_artist, mArtists);
     }
 
@@ -102,7 +103,7 @@ public class ArtistSearchFragment extends Fragment {
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
                 final Activity parentActivity = getActivity();
                 if (parentActivity instanceof OnArtistSelected) {
-                    final Artist artist = (Artist) parentAdapter.getItemAtPosition(position);
+                    final ArtistInfo artist = (ArtistInfo) parentAdapter.getItemAtPosition(position);
                     ((OnArtistSelected) parentActivity).onArtistSelected(artist);
                 } else {
                     Log.d(TAG, "Containing activity should implement OnArtistSelected");
@@ -153,7 +154,7 @@ public class ArtistSearchFragment extends Fragment {
             @Override
             public void success(final ArtistsPager pager, Response response) {
                 mLastTotal = pager.artists.total;
-                mArtists = pager.artists.items;
+                mArtists = ArtistInfo.listOf(pager.artists.items);
                 if (mArtists.isEmpty()) {
                     Util.showToast(getActivity(), "Sorry, no artists found with that name");
                     focusInput();
@@ -185,7 +186,7 @@ public class ArtistSearchFragment extends Fragment {
         spot.searchArtists(searchStr, options, new Callback<ArtistsPager>() {
             @Override
             public void success(final ArtistsPager pager, Response response) {
-                List<Artist> newArtists = pager.artists.items;
+                ArrayList<ArtistInfo> newArtists = ArtistInfo.listOf(pager.artists.items);
                 Util.adapterAddAll(mAdapter, newArtists);
             }
             @Override
@@ -216,10 +217,10 @@ public class ArtistSearchFragment extends Fragment {
     }
 
 
-    class ArtistAdapter extends ArrayAdapter<Artist> {
+    class ArtistAdapter extends ArrayAdapter<ArtistInfo> {
         private final int mResource;
 
-        ArtistAdapter(Context context, int resource, List<Artist> artists) {
+        ArtistAdapter(Context context, int resource, List<ArtistInfo> artists) {
             super(context, resource, artists);
             mResource = resource;
         }
@@ -237,9 +238,9 @@ public class ArtistSearchFragment extends Fragment {
                 ArtistSearchFragment.this.retrieveMoreArtists();
             }
             ViewHolder views = (ViewHolder) item.getTag();
-            Artist artist = getItem(position);
+            ArtistInfo artist = getItem(position);
             views.artistName.setText(artist.name);
-            String imageUrl = Util.getImageUrl(artist.images);
+            String imageUrl = artist.smallImageUrl;
             Util.loadImageInto(getContext(), imageUrl, views.artistImage);
             return item;
         }

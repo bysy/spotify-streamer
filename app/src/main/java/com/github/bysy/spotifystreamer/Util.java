@@ -51,7 +51,7 @@ public class Util {
 
     /** Return the Url of the smallest usable image. */
     @Nullable
-    static String getImageUrl(@NonNull List<Image> images) {
+    public static String getImageUrl(@NonNull List<Image> images) {
         if (images.isEmpty()) return null;
         final String url = findSmallImage(images).url;
         // http://stackoverflow.com/questions/5617749/how-to-validate-a-url-website-name-in-edittext-in-android

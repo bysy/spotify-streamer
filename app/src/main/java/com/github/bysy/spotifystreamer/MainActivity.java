@@ -10,7 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import kaaes.spotify.webapi.android.models.Artist;
+import com.github.bysy.spotifystreamer.data.ArtistInfo;
 
 
 public class MainActivity extends AppCompatActivity
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onArtistSelected(Artist artist) {
+    public void onArtistSelected(ArtistInfo artist) {
         if (mIsMultiPane) {
             TopSongsFragment detailFragment = new TopSongsFragment();
             Bundle args = new Bundle();
