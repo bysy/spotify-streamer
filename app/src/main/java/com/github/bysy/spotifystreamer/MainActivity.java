@@ -14,7 +14,13 @@ import com.github.bysy.spotifystreamer.data.ArtistInfo;
 
 
 public class MainActivity extends AppCompatActivity
-        implements ArtistSearchFragment.OnArtistSelected {
+        implements ArtistSearchFragment.OnArtistSelected,
+        TopSongsFragment.ShouldLaunchDialogPlayer {
+
+    @Override
+    public boolean shouldLaunchDialogPlayer() {
+        return true;  // mIsMultiPane is always true when we own the detail fragment
+    }
 
     static class Key {
         static final String ARTIST_NAME = "ARTIST_NAME";

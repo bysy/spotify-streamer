@@ -4,6 +4,7 @@
 
 package com.github.bysy.spotifystreamer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -37,9 +38,12 @@ import retrofit.client.Response;
 
 
 /**
- * Fragment to show the top songs of an artist.
+ * Fragment to show the top songs of an artist. Parent classes can implement
+ * ShouldLaunchDialogPlayer to signal if they prefer a dialog player or activity player.
  */
 public class TopSongsFragment extends Fragment {
+    private static final String PLAYER_FRAGMENT_TAG = "PLAYER_FRAGMENT_TAG";
+
     public static class Key {
         public static final String SONGS_PARCEL = "SONGS_PARCEL";
         public static final String CURRENT_SONG = "CURRENT_SONG";
@@ -47,6 +51,10 @@ public class TopSongsFragment extends Fragment {
     static private final String TAG = TopSongsFragment.class.getSimpleName();
     private SongsAdapter mAdapter;
     private ArrayList<SongInfo> mSongs;
+
+    interface ShouldLaunchDialogPlayer {
+        boolean shouldLaunchDialogPlayer();
+    }
 
     public TopSongsFragment() {
     }
@@ -88,11 +96,24 @@ public class TopSongsFragment extends Fragment {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Open player activity at this song
-                Intent i = new Intent(getActivity(), PlayerActivity.class);
-                i.putExtra(Key.SONGS_PARCEL, mSongs);
-                i.putExtra(Key.CURRENT_SONG, position);
-                startActivity(i);
+                // Open player dialog or activity at this song
+                final Activity activity = getActivity();
+                final boolean launchDialog = (activity instanceof ShouldLaunchDialogPlayer) &&
+                        ((ShouldLaunchDialogPlayer) activity).shouldLaunchDialogPlayer();
+                if (launchDialog) {
+                    PlayerFragment playerFragment = new PlayerFragment();
+                    Bundle args = new Bundle();
+                    args.putParcelableArrayList(Key.SONGS_PARCEL, mSongs);
+                    args.putInt(Key.CURRENT_SONG, position);
+                    playerFragment.setArguments(args);
+                    playerFragment.show(getActivity().getSupportFragmentManager(),
+                            PLAYER_FRAGMENT_TAG);
+                } else {
+                    Intent i = new Intent(getActivity(), PlayerActivity.class);
+                    i.putExtra(Key.SONGS_PARCEL, mSongs);
+                    i.putExtra(Key.CURRENT_SONG, position);
+                    startActivity(i);
+                }
             }
         });
         return view;

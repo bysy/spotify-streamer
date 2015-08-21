@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
 /**
  * Play a song.
  */
-public class PlayerFragment extends Fragment {
+public class PlayerFragment extends DialogFragment {
     // TODO: Refactor to use this class as a thin view controller.
     //       Put player state in separate retained fragment.
     //       That should allow binding to service, adding
