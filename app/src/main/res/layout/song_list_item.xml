@@ -19,6 +19,7 @@
         android:layout_marginBottom="@dimen/icon_vertical_margin"
         android:layout_marginLeft="@dimen/icon_horizontal_margin"
         android:layout_marginRight="@dimen/icon_horizontal_margin"
+        android:scaleType="centerCrop"
         android:background="@color/accent" />
 
     <LinearLayout
