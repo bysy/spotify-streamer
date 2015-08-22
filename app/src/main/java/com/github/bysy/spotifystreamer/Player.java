@@ -64,6 +64,11 @@ public class Player extends Fragment {
         mCurrentIdx = 0;
     }
 
+    /** Return current song. Playlist must have been set prior to calling this method.*/
+    public @NonNull SongInfo getCurrentSong() {
+        return mSongs.get(mCurrentIdx);
+    }
+
     /**
      * Start playing. If paused, resumes play.
      * @param context Calling context. Needed so that Player doesn't have
