@@ -4,8 +4,6 @@
 
 package com.github.bysy.spotifystreamer;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
@@ -18,7 +16,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.bysy.spotifystreamer.data.SongInfo;
-import com.github.bysy.spotifystreamer.service.PlayerService;
 
 import java.util.ArrayList;
 
@@ -42,6 +39,7 @@ public class PlayerDialog extends DialogFragment {
     private int mCurrentIndex;
     private boolean mIsPlaying;
     private ImageButton mPlayButton;
+    private Player mPlayer;
 
     public PlayerDialog() {
     }
@@ -126,7 +124,7 @@ public class PlayerDialog extends DialogFragment {
         Util.showToast(getActivity(), "Previous clicked");
         modifyCurrentIndex(-1);
         setViewData();
-        sendPlayerCommand(PlayerService.ACTION_CHANGE_SONG);
+        mPlayer.previous(getActivity());
     }
 
     private void onPlayButtonClick() {
@@ -137,9 +135,9 @@ public class PlayerDialog extends DialogFragment {
 
     private void togglePlayState() {
         if (mIsPlaying) {
-            sendPlayerCommand(PlayerService.ACTION_PAUSE);
+            mPlayer.pause(getActivity());
         } else {
-            sendPlayerCommand(PlayerService.ACTION_RESUME);
+            mPlayer.play(getActivity());
         }
         mIsPlaying = !mIsPlaying;
     }
@@ -148,7 +146,7 @@ public class PlayerDialog extends DialogFragment {
         Util.showToast(getActivity(), "Next clicked");
         modifyCurrentIndex(1);
         setViewData();
-        sendPlayerCommand(PlayerService.ACTION_CHANGE_SONG);
+        mPlayer.next(getActivity());
         mIsPlaying = true;
         setPlayButtonView();
     }
@@ -168,21 +166,6 @@ public class PlayerDialog extends DialogFragment {
         mCurrentIndex = newIndex<0 ? mSongs.size()-1 : (newIndex>=mSongs.size() ? 0 : newIndex);
     }
 
-    private void sendPlayerCommand(String action) {
-        // This method sends the full playlist each time. That's inefficient
-        // but it means we are in control of the position in the playlist
-        // no matter if the service has to be recreated without having
-        // to bind to it. As a half-way optimization, PlayerService only
-        // copies in the playlist when it has to be recreated. Otherwise,
-        // it retains the previous playlist.
-        final Context appContext = getActivity().getApplicationContext();
-        Intent playerIntent = new Intent(appContext, PlayerService.class);
-        playerIntent.setAction(action);
-        playerIntent.putExtra(TopSongsFragment.Key.CURRENT_SONG, mCurrentIndex);
-        playerIntent.putExtra(TopSongsFragment.Key.SONGS_PARCEL, mSongs);
-        appContext.startService(playerIntent);
-    }
-
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -192,7 +175,9 @@ public class PlayerDialog extends DialogFragment {
         if (savedInstanceState!=null) {
             return;
         }
-        sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
+        mPlayer = Player.getSharedPlayer(getActivity());
+        mPlayer.setNewPlaylist(mSongs);
+        mPlayer.playAt(getActivity(), mCurrentIndex);
         mIsPlaying = true;
         // Be all cute and delay showing the pause icon. Really, it should
         // be swapped in via the onPrepared() callback. Requires binding
