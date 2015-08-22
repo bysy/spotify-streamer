@@ -21,6 +21,8 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+        // Initialize the player here so it can start the service
+        Player.getSharedPlayer(this).initialize(this);
         if (savedInstanceState!=null) {
             return;
         }

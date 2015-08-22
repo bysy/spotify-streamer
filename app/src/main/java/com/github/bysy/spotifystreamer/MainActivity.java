@@ -35,6 +35,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mIsMultiPane = findViewById(R.id.multipane_detail_container)!=null;
+        // In multi-pane mode, the player is tied to our fragment manager
+        if (mIsMultiPane) {
+            Player.getSharedPlayer(this).initialize(this);
+        }
     }
 
     @Override

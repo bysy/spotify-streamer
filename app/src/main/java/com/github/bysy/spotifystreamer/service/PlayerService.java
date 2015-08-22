@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -34,10 +35,16 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public static final String ACTION_RESUME = "ACTION_RESUME";
     private boolean mHasCompleted;
 
+    public class LocalBinder extends Binder {
+        public PlayerService getService() {
+            return PlayerService.this;
+        }
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new LocalBinder();
     }
 
     @Override

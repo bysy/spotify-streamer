@@ -60,7 +60,8 @@ public class PlayerDialog extends DialogFragment {
             mIsPlaying = false;
             if (songs!=null) {
                 mPlayer.setNewPlaylist(songs);
-                mPlayer.playAt(getActivity(), currentIdx);
+                mPlayer.setCurrentIndex(currentIdx);
+                mPlayer.setAutoPlay(true);
                 mIsPlaying = true;
             }
         } else {
@@ -121,7 +122,7 @@ public class PlayerDialog extends DialogFragment {
 
     private void onPrevButtonClick() {
         Util.showToast(getActivity(), "Previous clicked");
-        mPlayer.previous(getActivity());
+        mPlayer.previous();
         setViewData();
     }
 
@@ -133,16 +134,16 @@ public class PlayerDialog extends DialogFragment {
 
     private void togglePlayState() {
         if (mIsPlaying) {
-            mPlayer.pause(getActivity());
+            mPlayer.pause();
         } else {
-            mPlayer.play(getActivity());
+            mPlayer.play();
         }
         mIsPlaying = !mIsPlaying;
     }
 
     private void onNextButtonClick() {
         Util.showToast(getActivity(), "Next clicked");
-        mPlayer.next(getActivity());
+        mPlayer.next();
         mIsPlaying = true;
         setViewData();
         setPlayButtonView();
