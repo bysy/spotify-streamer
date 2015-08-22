@@ -25,12 +25,12 @@ import java.util.ArrayList;
 /**
  * Play a song.
  */
-public class PlayerFragment extends DialogFragment {
+public class PlayerDialog extends DialogFragment {
     // TODO: Refactor to use this class as a thin view controller.
     //       Put player state in separate retained fragment.
     //       That should allow binding to service, adding
     //       callbacks and generally make things simpler.
-    private static final String TAG = PlayerFragment.class.getSimpleName();
+    private static final String TAG = PlayerDialog.class.getSimpleName();
     private static final String SONG_PARCEL_KEY = "SONG_PARCEL_KEY";
     private static final String CURRENT_INDEX_KEY = "CURRENT_INDEX_KEY";
     private static final java.lang.String IS_PLAYING_KEY = "IS_PLAYING_KEY";
@@ -43,7 +43,7 @@ public class PlayerFragment extends DialogFragment {
     private boolean mIsPlaying;
     private ImageButton mPlayButton;
 
-    public PlayerFragment() {
+    public PlayerDialog() {
     }
 
     @Override
@@ -81,7 +81,7 @@ public class PlayerFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_player, container, false);
+        View view = inflater.inflate(R.layout.fragment_player_dialog, container, false);
         mAlbumImageView = (ImageView) view.findViewById(R.id.playerAlbumImage);
 
         mArtistTextView = (TextView) view.findViewById(R.id.artistNameView);

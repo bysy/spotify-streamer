@@ -13,7 +13,7 @@
     android:paddingRight="0dp"
     android:paddingTop="8dp"
     android:paddingBottom="0dp"
-    tools:context="com.github.bysy.spotifystreamer.PlayerFragment">
+    tools:context="com.github.bysy.spotifystreamer.PlayerDialog">
 
     <TextView
         android:layout_width="wrap_content"

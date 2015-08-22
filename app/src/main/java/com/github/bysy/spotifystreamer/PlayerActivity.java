@@ -32,10 +32,10 @@ public class PlayerActivity extends AppCompatActivity {
         Bundle args = new Bundle();
         args.putParcelableArrayList(TopSongsFragment.Key.SONGS_PARCEL, songs);
         args.putInt(TopSongsFragment.Key.CURRENT_SONG, currentIndex);
-        PlayerFragment playerFragment = new PlayerFragment();
-        playerFragment.setArguments(args);
+        PlayerDialog playerDialog = new PlayerDialog();
+        playerDialog.setArguments(args);
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.player_container, playerFragment)
+                .replace(R.id.player_container, playerDialog)
                 .commit();
     }
 
