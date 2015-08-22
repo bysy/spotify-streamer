@@ -37,13 +37,15 @@ public class TopSongsActivity extends AppCompatActivity {
             Log.e(TAG, MainActivity.Key.ARTIST_ID.concat(" is missing"));
             return;
         }
-        TopSongsFragment fragment = new TopSongsFragment();
-        Bundle args = new Bundle();
-        args.putString(MainActivity.Key.ARTIST_ID, id);
-        fragment.setArguments(args);
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.top_songs_container, fragment)
-                .commit();
+        if (savedInstanceState==null) {
+            TopSongsFragment fragment = new TopSongsFragment();
+            Bundle args = new Bundle();
+            args.putString(MainActivity.Key.ARTIST_ID, id);
+            fragment.setArguments(args);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.top_songs_container, fragment)
+                    .commit();
+        }
     }
 
 
