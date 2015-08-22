@@ -21,6 +21,10 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+        if (savedInstanceState!=null) {
+            return;
+        }
+        // First run, create the player fragment
         final Intent in = getIntent();
         final ArrayList<SongInfo> songs =
                 in.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);

@@ -32,6 +32,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public static final String ACTION_CHANGE_SONG = "ACTION_CHANGE_SONG";
     public static final String ACTION_PAUSE = "ACTION_PAUSE";
     public static final String ACTION_RESUME = "ACTION_RESUME";
+    private boolean mHasCompleted;
 
     @Nullable
     @Override
@@ -52,7 +53,12 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 success = handleNewPlaylist(intent);
                 break;
             case ACTION_PAUSE:
-                success = true;
+                if (mHasCompleted) {
+                    success = true;
+                    break;
+                }
+                success = initializeIfNecessary(intent);
+                if (!success) break;
                 try {
                     if (mMediaPlayer.isPlaying()) {
                         mMediaPlayer.pause();
@@ -63,13 +69,17 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 }
                 break;
             case ACTION_RESUME:
-                success = true;
+                success = initializeIfNecessary(intent);
+                if (!success) break;
                 try {
                     if (!mMediaPlayer.isPlaying()) {
                         mMediaPlayer.start();
                     }
+                    if (mMediaPlayer.isPlaying()) break;
+                    // Need to restart player completely
+                    success = initializeIfNecessary(intent);
+                    prepareAndStart();
                 } catch (IllegalStateException e) {
-                    success = false;
                     mMediaPlayer.reset();
                 }
                 break;
@@ -111,6 +121,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     private boolean prepareAndStart() {
+        mHasCompleted = false;
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         if (mCurrentIndex>=mSongs.size()) mCurrentIndex = 0;
         final String previewUrl = mSongs.get(mCurrentIndex).previewUrl;
@@ -143,6 +154,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        mHasCompleted = true;
     }
 }
