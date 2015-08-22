@@ -31,6 +31,7 @@ public class SongInfo implements Parcelable {
     /** Url for the album image. Guaranteed to hold a pattern-valid Url if non-empty. */
     @NonNull public final String albumImageUrl;
     @NonNull public final String previewUrl;
+    @NonNull public final String externalSpotifyUrl;
 
     // Implement Parcelable
 
@@ -48,6 +49,7 @@ public class SongInfo implements Parcelable {
         dest.writeString(name);
         dest.writeString(albumImageUrl);
         dest.writeString(previewUrl);
+        dest.writeString(externalSpotifyUrl);
     }
 
     protected SongInfo(Parcel in) {
@@ -58,6 +60,7 @@ public class SongInfo implements Parcelable {
         name = in.readString();
         albumImageUrl = in.readString();
         previewUrl = in.readString();
+        externalSpotifyUrl = in.readString();
     }
 
     public static final Creator<SongInfo> CREATOR = new Creator<SongInfo>() {
@@ -102,9 +105,9 @@ public class SongInfo implements Parcelable {
         final String imageUrl = Util.getLargeImageUrl(spotifyTrack.album.images);
         albumImageUrl = imageUrl==null ? "" : imageUrl;
         previewUrl = spotifyTrack.preview_url;
+        final String maybeSpotifyUrl = spotifyTrack.external_urls.get("spotify");
+        externalSpotifyUrl = (maybeSpotifyUrl==null) ? "" : maybeSpotifyUrl;
     }
-
-    // Implement equals() and hashCode(). Thanks AndroidStudio!
 
     @Override
     public boolean equals(Object o) {
@@ -118,9 +121,11 @@ public class SongInfo implements Parcelable {
         if (!primaryArtistName.equals(songInfo.primaryArtistName)) return false;
         if (!albumName.equals(songInfo.albumName)) return false;
         if (!name.equals(songInfo.name)) return false;
-        //noinspection SimplifiableIfStatement
         if (!albumImageUrl.equals(songInfo.albumImageUrl)) return false;
-        return previewUrl.equals(songInfo.previewUrl);
+        //noinspection SimplifiableIfStatement
+        if (!previewUrl.equals(songInfo.previewUrl)) return false;
+        return externalSpotifyUrl.equals(songInfo.externalSpotifyUrl);
+
     }
 
     @Override
@@ -132,6 +137,10 @@ public class SongInfo implements Parcelable {
         result = 31 * result + name.hashCode();
         result = 31 * result + albumImageUrl.hashCode();
         result = 31 * result + previewUrl.hashCode();
+        result = 31 * result + externalSpotifyUrl.hashCode();
         return result;
     }
+
+    // Implement equals() and hashCode(). Thanks AndroidStudio!
+
 }

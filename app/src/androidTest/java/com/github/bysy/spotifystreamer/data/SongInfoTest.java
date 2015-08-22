@@ -9,6 +9,7 @@ import android.test.AndroidTestCase;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import kaaes.spotify.webapi.android.models.AlbumSimple;
@@ -45,6 +46,8 @@ public class SongInfoTest extends AndroidTestCase {
         exampleTrack.external_ids = Collections.emptyMap();
         exampleTrack.popularity = 100;
         exampleTrack.id = "track1234567";
+        exampleTrack.external_urls = new HashMap<>();
+        exampleTrack.external_urls.put("spotify", "http://external_url");
     }
 
     public void testParcelable() {
