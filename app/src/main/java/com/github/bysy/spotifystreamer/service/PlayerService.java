@@ -10,6 +10,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -140,6 +141,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     private boolean prepareAndStart() {
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mMediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
         if (mCurrentIndex>=mSongs.size()) mCurrentIndex = 0;
         final String previewUrl = mSongs.get(mCurrentIndex).previewUrl;
         Log.d(TAG, "Trying to play ".concat(previewUrl));
@@ -153,6 +155,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         }
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setOnCompletionListener(this);
+        // TODO: Consider acquiring wifi-lock if appropriate
         mMediaPlayer.prepareAsync();
         return true;
     }
