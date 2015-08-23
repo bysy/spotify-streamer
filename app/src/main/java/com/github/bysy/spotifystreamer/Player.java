@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.github.bysy.spotifystreamer.data.SongInfo;
@@ -42,7 +43,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     private Set<OnPlayStateChange> mPlayListeners = new HashSet<>(2);
 
     public interface OnPlayStateChange {
-        void onPlayStateChange(boolean isPlaying);
+        void onPlayStateChange(boolean isPlaying, @Nullable SongInfo maybeSong);
     }
 
     public void registerPlayChangeListener(OnPlayStateChange listener) {
@@ -88,7 +89,8 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     }
 
     /** Return current song. Playlist must have been set prior to calling this method.*/
-    public @NonNull SongInfo getCurrentSong() {
+    public @Nullable SongInfo getCurrentSong() {
+        if (sSongs==null) return null;
         return sSongs.get(sCurrentIdx);
     }
 
@@ -172,7 +174,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     @Override
     public void onStateChange(boolean isPlaying) {
         for (OnPlayStateChange listener : mPlayListeners) {
-            listener.onPlayStateChange(isPlaying);
+            listener.onPlayStateChange(isPlaying, getCurrentSong());
         }
     }
 

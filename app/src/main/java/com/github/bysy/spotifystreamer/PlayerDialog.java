@@ -5,10 +5,18 @@
 package com.github.bysy.spotifystreamer;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -31,6 +39,7 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
     private TextView mSongTextView;
     private ImageButton mPlayButton;
     private Player mPlayer;
+    private ShareActionProvider mShareActionProvider;
 
     public PlayerDialog() {
     }
@@ -42,6 +51,7 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -83,6 +93,35 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
             }
         });
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_player_dialog, menu);
+        MenuItem item = menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        if (mShareActionProvider==null) {
+            Log.d("TAG", "ShareActionProvider is unexpectedly null");
+        }
+    }
+
+    private void setShareIntent(SongInfo song) {
+        if (mShareActionProvider!=null) {
+            mShareActionProvider.setShareIntent(getShareIntent(song));
+        }
+    }
+
+    private Intent getShareIntent(SongInfo song) {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        //noinspection deprecation since we target older API
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        final String shareText =
+                getString(R.string.app_name_hashtag) + ": Loving this track\n" +
+                song.externalSpotifyUrl;
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+        return shareIntent;
     }
 
     @Override
@@ -129,6 +168,7 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
 
     private void setViewData() {
         final SongInfo currentSong = mPlayer.getCurrentSong();
+        if (currentSong==null) return;
         mArtistTextView.setText(currentSong.primaryArtistName);
         mAlbumTextView.setText(currentSong.albumName);
         mSongTextView.setText(currentSong.name);
@@ -150,8 +190,11 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
     }
 
     @Override
-    public void onPlayStateChange(boolean isPlaying) {
+    public void onPlayStateChange(boolean isPlaying, @Nullable SongInfo song) {
         if (mPlayButton==null) return;
         setPlayButtonView(isPlaying);
+        if (isPlaying && song!=null) {
+            setShareIntent(song);
+        }
     }
 }

@@ -4,6 +4,7 @@
 
 <resources>
     <string name="app_name">Spotify Streamer</string>
+    <string name="app_name_hashtag">#SpotifyStreamer</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_top_songs">TopSongsActivity</string>
     <string name="searchHint">Search artist</string>
@@ -13,4 +14,5 @@
     <string name="pref_locale_key">locale</string>
     <string name="title_activity_settings">Settings</string>
     <string name="action_now_playing_label">Now Playing</string>
+    <string name="action_share_label">Share song</string>
 </resources>
