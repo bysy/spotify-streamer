@@ -142,7 +142,13 @@ public class TopSongsFragment extends Fragment {
             @Override
             public void failure(RetrofitError error) {
                 Log.d(TAG, "Top tracks failure: ".concat(error.toString()));
-                Util.showToast(getActivity(), "Couldn't connect to Spotify");
+                // Check for (country-related) bad request code.
+                Response response = error.getResponse();
+                if (response!=null && response.getStatus()==400) {
+                    Util.showToast(getActivity(), "Spotify didn't send any tracks. Try setting a custom locale like \"US\".");
+                } else {
+                    Util.showToast(getActivity(), "Couldn't connect to Spotify");
+                }
             }
         });
     }
