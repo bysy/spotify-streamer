@@ -22,7 +22,8 @@ public class PlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         // Initialize the player here so it can start the service
-        Player.getSharedPlayer(this).initialize(this);
+        Player player = Player.getSharedPlayer(this);
+        player.initialize(this);
         if (savedInstanceState!=null) {
             return;
         }
@@ -31,11 +32,10 @@ public class PlayerActivity extends AppCompatActivity {
         final ArrayList<SongInfo> songs =
                 in.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);
         final int currentIndex = in.getIntExtra(TopSongsFragment.Key.CURRENT_SONG, 0);
-        Bundle args = new Bundle();
-        args.putParcelableArrayList(TopSongsFragment.Key.SONGS_PARCEL, songs);
-        args.putInt(TopSongsFragment.Key.CURRENT_SONG, currentIndex);
+        player.setNewPlaylist(songs);
+        player.setCurrentIndex(currentIndex);
+        player.setAutoPlay(true);
         PlayerDialog playerDialog = new PlayerDialog();
-        playerDialog.setArguments(args);
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.player_container, playerDialog)
                 .commit();

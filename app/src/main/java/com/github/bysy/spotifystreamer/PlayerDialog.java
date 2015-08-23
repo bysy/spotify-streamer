@@ -6,7 +6,6 @@ package com.github.bysy.spotifystreamer;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +14,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.github.bysy.spotifystreamer.data.SongInfo;
-
-import java.util.ArrayList;
 
 /**
  * Play a song.
@@ -39,27 +36,6 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPlayer = Player.getSharedPlayer(getActivity());
-        mPlayer.registerPlayChangeListener(this);
-
-        if (savedInstanceState==null) {
-            // first run
-            Bundle args = getArguments();
-            ArrayList<SongInfo> songs = null;
-            int currentIdx = 0;
-            if (args!=null) {
-                songs = args.getParcelableArrayList(TopSongsFragment.Key.SONGS_PARCEL);
-                currentIdx = args.getInt(TopSongsFragment.Key.CURRENT_SONG, 0);
-            }
-            if (songs==null) {
-                Log.e(TAG, "Created without songs argument.");
-            }
-            if (songs!=null) {
-                mPlayer.setAutoPlay(true);
-                mPlayer.setNewPlaylist(songs);
-                mPlayer.setCurrentIndex(currentIdx);
-            }
-        }
     }
 
     @Override
@@ -157,6 +133,8 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        mPlayer = Player.getSharedPlayer(getActivity());
+        mPlayer.registerPlayChangeListener(this);
         setViewData();
     }
 
