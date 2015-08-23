@@ -4,6 +4,7 @@
 
 package com.github.bysy.spotifystreamer.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -12,8 +13,12 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import com.github.bysy.spotifystreamer.PlayerActivity;
+import com.github.bysy.spotifystreamer.R;
 import com.github.bysy.spotifystreamer.TopSongsFragment;
 import com.github.bysy.spotifystreamer.data.SongInfo;
 
@@ -25,6 +30,7 @@ import java.util.ArrayList;
  */
 public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     private static final String ACTION_NULL = "ACTION_NULL";
+    private static final int NOTIFICATION_ID = 234500001;
     private static String TAG = PlayerService.class.getSimpleName();
     private OnStateChange mListener = null;
     private ArrayList<SongInfo> mSongs;
@@ -57,6 +63,23 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     @Override
     public IBinder onBind(Intent intent) {
         return new LocalBinder();
+    }
+
+    public void showForegroundNotification(SongInfo song) {
+        Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        final String artist = song.isCollaboration() ?
+                song.primaryArtistName.concat(" & others") : song.primaryArtistName;
+        builder.setSmallIcon(R.drawable.play_icon)
+                .setContentTitle("Playing ".concat(song.name))
+                .setContentText("by ".concat(artist))
+                .setOngoing(true);
+        TaskStackBuilder stack = TaskStackBuilder.create(this);
+        stack.addParentStack(PlayerActivity.class);
+        stack.addNextIntent(intent);
+        PendingIntent pi = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(pi);
+        startForeground(NOTIFICATION_ID, builder.build());
     }
 
     @Override

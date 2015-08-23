@@ -160,6 +160,7 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
         if (!checkSongs("playAt")) return;
         sCurrentIdx = Math.max(0, Math.min(index, sSongs.size()-1));
         sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
+        mService.showForegroundNotification(getCurrentSong());
     }
 
     void pause() {
@@ -172,6 +173,7 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
         int prev = sCurrentIdx - 1;
         sCurrentIdx = (prev>=0) ? prev : sSongs.size()-1;
         sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
+        mService.showForegroundNotification(getCurrentSong());
     }
 
     public void next() {
@@ -179,6 +181,7 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
         int next = sCurrentIdx + 1;
         sCurrentIdx = (next< sSongs.size()) ? next : 0;
         sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
+        mService.showForegroundNotification(getCurrentSong());
     }
 
     private boolean checkSongs(@NonNull String forMethod) {
