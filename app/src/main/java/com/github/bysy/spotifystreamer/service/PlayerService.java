@@ -60,11 +60,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 success = handleNewPlaylist(intent);
                 break;
             case ACTION_PAUSE:
-                if (mHasCompleted) {
-                    success = true;
-                    break;
-                }
-                success = initializeIfNecessary(intent);
+                success = true;
+                if (mHasCompleted) break;
+                if (mMediaPlayer==null) success = initializeIfNecessary(intent);
                 if (!success) break;
                 try {
                     if (mMediaPlayer.isPlaying()) {
@@ -76,7 +74,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 }
                 break;
             case ACTION_RESUME:
-                success = initializeIfNecessary(intent);
+                success = true;
+                if (mMediaPlayer==null) {
+                    success = initializeIfNecessary(intent);
+                }
                 if (!success) break;
                 try {
                     if (!mMediaPlayer.isPlaying()) {
@@ -156,6 +157,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        mHasCompleted = false;
         mp.start();
     }
 
