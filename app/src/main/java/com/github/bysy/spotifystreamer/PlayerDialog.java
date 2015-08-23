@@ -129,20 +129,17 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
     }
 
     private void onPrevButtonClick() {
-        Util.showToast(getActivity(), "Previous clicked");
         mPlayer.previous();
         setViewData();
         setPlayButtonView();
     }
 
     private void onPlayButtonClick() {
-        Util.showToast(getActivity(), "Play clicked");
         mPlayer.togglePlayState();
         setPlayButtonView();
     }
 
     private void onNextButtonClick() {
-        Util.showToast(getActivity(), "Next clicked");
         mPlayer.next();
         setViewData();
         setPlayButtonView();
