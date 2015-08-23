@@ -6,6 +6,7 @@ package com.github.bysy.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,15 +16,16 @@ import com.github.bysy.spotifystreamer.data.SongInfo;
 import java.util.ArrayList;
 
 /** Play a song. */
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends AppCompatActivity implements PlayerDialog.GetPlayer {
+    Player mPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         // Initialize the player here so it can start the service
-        Player player = Player.getSharedPlayer(this);
-        player.initialize(this);
+        mPlayer = new Player();
+        mPlayer.initialize(this);
         if (savedInstanceState!=null) {
             return;
         }
@@ -34,9 +36,9 @@ public class PlayerActivity extends AppCompatActivity {
         final boolean openedFromNowPlaying = songs==null;
         if (!openedFromNowPlaying) {
             final int currentIndex = in.getIntExtra(TopSongsFragment.Key.CURRENT_SONG, 0);
-            player.setNewPlaylist(songs);
-            player.setCurrentIndex(currentIndex);
-            player.setAutoPlay(true);
+            mPlayer.setNewPlaylist(songs);
+            mPlayer.setCurrentIndex(currentIndex);
+            mPlayer.setAutoPlay(true);
         }
         PlayerDialog playerDialog = new PlayerDialog();
         getSupportFragmentManager().beginTransaction()
@@ -65,5 +67,11 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @NonNull
+    @Override
+    public Player getPlayer() {
+        return mPlayer;
     }
 }

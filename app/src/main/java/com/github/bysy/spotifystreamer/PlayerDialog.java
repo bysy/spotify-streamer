@@ -4,7 +4,9 @@
 
 package com.github.bysy.spotifystreamer;
 
+import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +18,7 @@ import android.widget.TextView;
 import com.github.bysy.spotifystreamer.data.SongInfo;
 
 /**
- * Play a song.
+ * Play a song. Containing Activity needs to implement interface GetPlayer
  */
 public class PlayerDialog extends DialogFragment implements Player.OnPlayStateChange {
     //  Player state is in separate retained fragment.
@@ -31,6 +33,10 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
     private Player mPlayer;
 
     public PlayerDialog() {
+    }
+
+    public interface GetPlayer {
+        @NonNull Player getPlayer();
     }
 
     @Override
@@ -133,7 +139,12 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mPlayer = Player.getSharedPlayer(getActivity());
+        final Activity parent = getActivity();
+        if (!(parent instanceof GetPlayer)) {
+            throw new IllegalStateException(
+                    TAG.concat(": Containing Activity doesn't implement GetPlayer"));
+        }
+        mPlayer = ((GetPlayer) parent).getPlayer();
         mPlayer.registerPlayChangeListener(this);
         setViewData();
     }

@@ -8,17 +8,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.github.bysy.spotifystreamer.data.SongInfo;
 import com.github.bysy.spotifystreamer.service.PlayerService;
@@ -28,16 +20,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Manage player state as a retained, non-UI fragment.
+ * Manage player state.
  */
-public class Player extends Fragment implements ServiceConnection, PlayerService.OnStateChange {
-    private static final String SHARED_PLAYER = "SHARED_PLAYER";
+public class Player implements ServiceConnection, PlayerService.OnStateChange {
     private static final String TAG = Player.class.getSimpleName();
-    private static final String CURRENT_IDX_KEY = "CURRENT_IDX_KEY";
-    private static final String SONGS_KEY = "SONGS_KEY";
+
+    // Keep playlist state in static fields. That works nicely because when our app
+    // is restored after it was killed completely, we don't really want to recreate
+    // these fields to their old values.
+    // If desired however, we could easily use GSON with a SharedPreference and
+    // restore appropriately. Alternatively, we could build a ContentProvider.
+    // Originally, I favored the ContentProvider approach because it would also
+    // let us cache queries. But since we're not supposed to save the preview
+    // audio files, we'd have to fire up the radio in any event.
     private static boolean sNowPlaying = false;
     private static ArrayList<SongInfo> sSongs = null;
     private static int sCurrentIdx = -1;
+
     private PlayerService mService;
     private boolean mAutoPlay = false;
     private Set<OnPlayStateChange> mPlayListeners = new HashSet<>(2);
@@ -58,44 +57,7 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
         return sNowPlaying;
     }
 
-    /** Retrieve a player instance that's tied to the passed-in activity. */
-    static Player getSharedPlayer(@NonNull FragmentActivity activity) {
-        final FragmentManager fragmentManager = activity.getSupportFragmentManager();
-        Fragment player = fragmentManager.findFragmentByTag(SHARED_PLAYER);
-        if (player==null) {
-            player = new Player();
-            fragmentManager.beginTransaction()
-                    .add(player, SHARED_PLAYER)
-                    .commit();
-        }
-        return (Player) player;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        setRetainInstance(true);
-        super.onCreate(savedInstanceState);
-        if (savedInstanceState!=null) {
-            Log.d(TAG, "Restoring player state from bundle");
-            sCurrentIdx = savedInstanceState.getInt(CURRENT_IDX_KEY);
-            sSongs = savedInstanceState.getParcelableArrayList(SONGS_KEY);
-            sNowPlaying = sSongs!=null && !sSongs.isEmpty();
-        }
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return null;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(CURRENT_IDX_KEY, sCurrentIdx);
-        outState.putParcelableArrayList(SONGS_KEY, sSongs);
-    }
-
+    /** Bind to the service. Call this before invoking play state methods (playAt() etc). */
     void initialize(Context context) {
         Context appContext = context.getApplicationContext();
         if (mService==null) {

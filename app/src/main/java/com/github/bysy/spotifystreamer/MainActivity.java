@@ -6,6 +6,7 @@ package com.github.bysy.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -16,11 +17,25 @@ import com.github.bysy.spotifystreamer.data.ArtistInfo;
 
 public class MainActivity extends AppCompatActivity
         implements ArtistSearchFragment.OnArtistSelected,
-        TopSongsFragment.ShouldLaunchDialogPlayer {
+        TopSongsFragment.ShouldLaunchDialogPlayer,
+        PlayerDialog.GetPlayer {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
+    private Player mPlayer = null;  // only available in multi-pane mode
 
     @Override
     public boolean shouldLaunchDialogPlayer() {
         return mIsMultiPane;
+    }
+
+    @NonNull
+    @Override
+    public Player getPlayer() {
+        if (!mIsMultiPane) {
+            throw new IllegalStateException(
+                    TAG.concat(": Cannot provide player in single-pane mode."));
+        }
+        return mPlayer;
     }
 
     static class Key {
@@ -38,7 +53,8 @@ public class MainActivity extends AppCompatActivity
         mIsMultiPane = findViewById(R.id.multipane_detail_container)!=null;
         // In multi-pane mode, the player is tied to our fragment manager
         if (mIsMultiPane) {
-            Player.getSharedPlayer(this).initialize(this);
+            mPlayer = new Player();
+            mPlayer.initialize(this);
         }
     }
 
