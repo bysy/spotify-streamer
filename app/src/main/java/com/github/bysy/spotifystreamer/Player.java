@@ -24,17 +24,32 @@ import com.github.bysy.spotifystreamer.data.SongInfo;
 import com.github.bysy.spotifystreamer.service.PlayerService;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Manage player state as a retained, non-UI fragment.
  */
-public class Player extends Fragment implements ServiceConnection {
+public class Player extends Fragment implements ServiceConnection, PlayerService.OnStateChange {
     private static final String SHARED_PLAYER = "SHARED_PLAYER";
     private static final String TAG = Player.class.getSimpleName();
     private ArrayList<SongInfo> mSongs = null;
     private int mCurrentIdx = -1;
     private PlayerService mService;
     private boolean mAutoPlay = false;
+    private Set<OnPlayStateChange> mPlayListeners = new HashSet<>(2);
+
+    public interface OnPlayStateChange {
+        void onPlayStateChange(boolean isPlaying);
+    }
+
+    public void registerPlayChangeListener(OnPlayStateChange listener) {
+        mPlayListeners.add(listener);
+    }
+
+    public void unregisterPlayChangeListener(OnPlayStateChange listener) {
+        mPlayListeners.remove(listener);
+    }
 
     /** Retrieve a player instance that's tied to the passed-in activity. */
     static Player getSharedPlayer(@NonNull FragmentActivity activity) {
@@ -85,13 +100,26 @@ public class Player extends Fragment implements ServiceConnection {
     public void setAutoPlay(boolean autoPlay) {
         mAutoPlay = autoPlay;
         if (mAutoPlay && mService!=null && !mSongs.isEmpty()) {
-            play();  // otherwise plays when service is connected
+            playAt(mCurrentIdx);  // otherwise plays when service is connected
         }
     }
 
     /** Return current song. Playlist must have been set prior to calling this method.*/
     public @NonNull SongInfo getCurrentSong() {
         return mSongs.get(mCurrentIdx);
+    }
+
+    public boolean isPlaying() {
+        return mService!=null && mService.isPlaying();
+    }
+
+    public void togglePlayState() {
+        if (mService==null) return;
+        if (mService.isPlaying()) {
+            pause();
+        } else {
+            play();
+        }
     }
 
     /**
@@ -152,15 +180,23 @@ public class Player extends Fragment implements ServiceConnection {
         playerIntent.setAction(action);
         playerIntent.putExtra(TopSongsFragment.Key.CURRENT_SONG, mCurrentIdx);
         playerIntent.putExtra(TopSongsFragment.Key.SONGS_PARCEL, mSongs);
-        //appContext.startService(playerIntent);
         mService.onStartCommand(playerIntent, 0, 0);
     }
 
     @Override
+    public void onStateChange(boolean isPlaying) {
+        for (OnPlayStateChange listener : mPlayListeners) {
+            listener.onPlayStateChange(isPlaying);
+        }
+    }
+
+    @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        mService = ((PlayerService.LocalBinder) service).getService();
+        PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
+        mService = binder.getService();
+        binder.registerListener(this);
         if (mAutoPlay && !mSongs.isEmpty()) {
-            play();
+            playAt(mCurrentIdx);
         }
     }
 

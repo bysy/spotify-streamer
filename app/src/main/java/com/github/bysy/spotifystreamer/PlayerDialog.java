@@ -5,7 +5,6 @@
 package com.github.bysy.spotifystreamer;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,18 +21,15 @@ import java.util.ArrayList;
 /**
  * Play a song.
  */
-public class PlayerDialog extends DialogFragment {
-    // TODO: Refactor to use this class as a thin view controller.
-    //       Put player state in separate retained fragment.
-    //       That should allow binding to service, adding
-    //       callbacks and generally make things simpler.
+public class PlayerDialog extends DialogFragment implements Player.OnPlayStateChange {
+    //  Player state is in separate retained fragment.
+    // That makes it easier to bind to service and use
+    // callbacks and generally makes things simpler.
     private static final String TAG = PlayerDialog.class.getSimpleName();
-    private static final java.lang.String IS_PLAYING_KEY = "IS_PLAYING_KEY";
     private ImageView mAlbumImageView;
     private TextView mArtistTextView;
     private TextView mAlbumTextView;
     private TextView mSongTextView;
-    private boolean mIsPlaying;
     private ImageButton mPlayButton;
     private Player mPlayer;
 
@@ -44,6 +40,7 @@ public class PlayerDialog extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPlayer = Player.getSharedPlayer(getActivity());
+        mPlayer.registerPlayChangeListener(this);
 
         if (savedInstanceState==null) {
             // first run
@@ -57,23 +54,17 @@ public class PlayerDialog extends DialogFragment {
             if (songs==null) {
                 Log.e(TAG, "Created without songs argument.");
             }
-            mIsPlaying = false;
             if (songs!=null) {
+                mPlayer.setAutoPlay(true);
                 mPlayer.setNewPlaylist(songs);
                 mPlayer.setCurrentIndex(currentIdx);
-                mPlayer.setAutoPlay(true);
-                mIsPlaying = true;
             }
-        } else {
-            // restore
-            mIsPlaying = savedInstanceState.getBoolean(IS_PLAYING_KEY);
         }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(IS_PLAYING_KEY, mIsPlaying);
     }
 
     @Override
@@ -112,8 +103,25 @@ public class PlayerDialog extends DialogFragment {
         return view;
     }
 
+    @Override
+    public void onPause() {
+        mPlayer.unregisterPlayChangeListener(this);
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        mPlayer.registerPlayChangeListener(this);
+        setPlayButtonView();
+        super.onResume();
+    }
+
     private void setPlayButtonView() {
-        if (mIsPlaying) {
+        setPlayButtonView(mPlayer.isPlaying());
+    }
+
+    private void setPlayButtonView(boolean isPlaying) {
+        if (isPlaying) {
             mPlayButton.setImageResource(R.drawable.pause_icon);
         } else {
             mPlayButton.setImageResource(R.drawable.play_icon);
@@ -124,27 +132,18 @@ public class PlayerDialog extends DialogFragment {
         Util.showToast(getActivity(), "Previous clicked");
         mPlayer.previous();
         setViewData();
+        setPlayButtonView();
     }
 
     private void onPlayButtonClick() {
         Util.showToast(getActivity(), "Play clicked");
-        togglePlayState();
+        mPlayer.togglePlayState();
         setPlayButtonView();
-    }
-
-    private void togglePlayState() {
-        if (mIsPlaying) {
-            mPlayer.pause();
-        } else {
-            mPlayer.play();
-        }
-        mIsPlaying = !mIsPlaying;
     }
 
     private void onNextButtonClick() {
         Util.showToast(getActivity(), "Next clicked");
         mPlayer.next();
-        mIsPlaying = true;
         setViewData();
         setPlayButtonView();
     }
@@ -162,21 +161,11 @@ public class PlayerDialog extends DialogFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setViewData();
+    }
 
-        // Don't start another player when the orientation etc changes.
-        if (savedInstanceState!=null) {
-            return;
-        }
-        // Be all cute and delay showing the pause icon. Really, it should
-        // be swapped in via the onPrepared() callback. Requires binding
-        // to the service.
-        final int delayMS = 500;
-        new Handler().postDelayed(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        setPlayButtonView();
-                    }
-                }, delayMS);
+    @Override
+    public void onPlayStateChange(boolean isPlaying) {
+        if (mPlayButton==null) return;
+        setPlayButtonView(isPlaying);
     }
 }

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
     private static final String ACTION_NULL = "ACTION_NULL";
     private static String TAG = PlayerService.class.getSimpleName();
+    private OnStateChange mListener = null;
     private ArrayList<SongInfo> mSongs;
     private MediaPlayer mMediaPlayer;
     private int mCurrentIndex = 0;
@@ -33,11 +34,21 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public static final String ACTION_CHANGE_SONG = "ACTION_CHANGE_SONG";
     public static final String ACTION_PAUSE = "ACTION_PAUSE";
     public static final String ACTION_RESUME = "ACTION_RESUME";
-    private boolean mHasCompleted;
+
+    public interface OnStateChange {
+        void onStateChange(boolean isPlaying);
+    }
+
+    public boolean isPlaying() {
+        return mMediaPlayer!=null && mMediaPlayer.isPlaying();
+    }
 
     public class LocalBinder extends Binder {
         public PlayerService getService() {
             return PlayerService.this;
+        }
+        public void registerListener(OnStateChange listener) {
+            mListener = listener;
         }
     }
 
@@ -61,7 +72,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 break;
             case ACTION_PAUSE:
                 success = true;
-                if (mHasCompleted) break;
                 if (mMediaPlayer==null) success = initializeIfNecessary(intent);
                 if (!success) break;
                 try {
@@ -129,7 +139,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     private boolean prepareAndStart() {
-        mHasCompleted = false;
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         if (mCurrentIndex>=mSongs.size()) mCurrentIndex = 0;
         final String previewUrl = mSongs.get(mCurrentIndex).previewUrl;
@@ -157,12 +166,12 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        mHasCompleted = false;
         mp.start();
+        if (mListener!=null) mListener.onStateChange(true);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        mHasCompleted = true;
+        if (mListener!=null) mListener.onStateChange(false);
     }
 }
