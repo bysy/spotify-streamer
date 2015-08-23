@@ -6,6 +6,7 @@ package com.github.bysy.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,7 +20,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean shouldLaunchDialogPlayer() {
-        return true;  // mIsMultiPane is always true when we own the detail fragment
+        return mIsMultiPane;
     }
 
     static class Key {
@@ -39,6 +40,12 @@ public class MainActivity extends AppCompatActivity
         if (mIsMultiPane) {
             Player.getSharedPlayer(this).initialize(this);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -67,17 +74,37 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        updateNowPlaying(menu);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        } else if (id==R.id.action_now_playing) {
+            handleNowPlaying(this, shouldLaunchDialogPlayer());
         }
-
         return super.onOptionsItemSelected(item);
+    }
+
+    static void updateNowPlaying(Menu menu) {
+        menu.findItem(R.id.action_now_playing).setEnabled(Player.nowPlaying());
+    }
+
+    static void handleNowPlaying(FragmentActivity activity, boolean showDialog) {
+        if (showDialog) {
+            PlayerDialog playerDialog = new PlayerDialog();
+            playerDialog.show(activity.getSupportFragmentManager(),
+                    TopSongsFragment.PLAYER_FRAGMENT_TAG);
+        } else {
+            Intent intent = new Intent(activity, PlayerActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            activity.startActivity(intent);
+        }
     }
 }

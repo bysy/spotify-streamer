@@ -48,12 +48,23 @@ public class TopSongsActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        invalidateOptionsMenu();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_song_selection, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MainActivity.updateNowPlaying(menu);
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -66,6 +77,9 @@ public class TopSongsActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             startActivity(new Intent(this, SettingsActivity.class));
             return true;
+        } else if (id==R.id.action_now_playing) {
+            final boolean showDialog = false;
+            MainActivity.handleNowPlaying(this, showDialog);
         }
 
         return super.onOptionsItemSelected(item);

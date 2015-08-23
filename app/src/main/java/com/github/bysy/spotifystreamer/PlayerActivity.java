@@ -31,10 +31,13 @@ public class PlayerActivity extends AppCompatActivity {
         final Intent in = getIntent();
         final ArrayList<SongInfo> songs =
                 in.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);
-        final int currentIndex = in.getIntExtra(TopSongsFragment.Key.CURRENT_SONG, 0);
-        player.setNewPlaylist(songs);
-        player.setCurrentIndex(currentIndex);
-        player.setAutoPlay(true);
+        final boolean openedFromNowPlaying = songs==null;
+        if (!openedFromNowPlaying) {
+            final int currentIndex = in.getIntExtra(TopSongsFragment.Key.CURRENT_SONG, 0);
+            player.setNewPlaylist(songs);
+            player.setCurrentIndex(currentIndex);
+            player.setAutoPlay(true);
+        }
         PlayerDialog playerDialog = new PlayerDialog();
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.player_container, playerDialog)

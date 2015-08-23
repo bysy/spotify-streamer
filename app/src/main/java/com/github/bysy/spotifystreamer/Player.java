@@ -35,8 +35,9 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
     private static final String TAG = Player.class.getSimpleName();
     private static final String CURRENT_IDX_KEY = "CURRENT_IDX_KEY";
     private static final String SONGS_KEY = "SONGS_KEY";
-    private ArrayList<SongInfo> mSongs = null;
-    private int mCurrentIdx = -1;
+    private static boolean sNowPlaying = false;
+    private static ArrayList<SongInfo> sSongs = null;
+    private static int sCurrentIdx = -1;
     private PlayerService mService;
     private boolean mAutoPlay = false;
     private Set<OnPlayStateChange> mPlayListeners = new HashSet<>(2);
@@ -51,6 +52,10 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
 
     public void unregisterPlayChangeListener(OnPlayStateChange listener) {
         mPlayListeners.remove(listener);
+    }
+
+    static boolean nowPlaying() {
+        return sNowPlaying;
     }
 
     /** Retrieve a player instance that's tied to the passed-in activity. */
@@ -72,8 +77,9 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
         super.onCreate(savedInstanceState);
         if (savedInstanceState!=null) {
             Log.d(TAG, "Restoring player state from bundle");
-            mCurrentIdx = savedInstanceState.getInt(CURRENT_IDX_KEY);
-            mSongs = savedInstanceState.getParcelableArrayList(SONGS_KEY);
+            sCurrentIdx = savedInstanceState.getInt(CURRENT_IDX_KEY);
+            sSongs = savedInstanceState.getParcelableArrayList(SONGS_KEY);
+            sNowPlaying = sSongs!=null && !sSongs.isEmpty();
         }
     }
 
@@ -86,8 +92,8 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(CURRENT_IDX_KEY, mCurrentIdx);
-        outState.putParcelableArrayList(SONGS_KEY, mSongs);
+        outState.putInt(CURRENT_IDX_KEY, sCurrentIdx);
+        outState.putParcelableArrayList(SONGS_KEY, sSongs);
     }
 
     void initialize(Context context) {
@@ -103,24 +109,25 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
             Log.w(TAG, "Cannot play empty playlist");
             return;
         }
-        mSongs = songs;
-        mCurrentIdx = 0;
+        sNowPlaying = true;
+        sSongs = songs;
+        sCurrentIdx = 0;
     }
 
     public void setCurrentIndex(int currentIndex) {
-        this.mCurrentIdx = currentIndex;
+        sCurrentIdx = currentIndex;
     }
 
     public void setAutoPlay(boolean autoPlay) {
         mAutoPlay = autoPlay;
-        if (mAutoPlay && mService!=null && !mSongs.isEmpty()) {
-            playAt(mCurrentIdx);  // otherwise plays when service is connected
+        if (mAutoPlay && mService!=null && !sSongs.isEmpty()) {
+            playAt(sCurrentIdx);  // otherwise plays when service is connected
         }
     }
 
     /** Return current song. Playlist must have been set prior to calling this method.*/
     public @NonNull SongInfo getCurrentSong() {
-        return mSongs.get(mCurrentIdx);
+        return sSongs.get(sCurrentIdx);
     }
 
     public boolean isPlaying() {
@@ -151,7 +158,7 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
      */
     void playAt(int index) {
         if (!checkSongs("playAt")) return;
-        mCurrentIdx = Math.max(0, Math.min(index, mSongs.size()-1));
+        sCurrentIdx = Math.max(0, Math.min(index, sSongs.size()-1));
         sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
     }
 
@@ -162,20 +169,20 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
 
     public void previous() {
         if (!checkSongs("previous")) return;
-        int prev = mCurrentIdx - 1;
-        mCurrentIdx = (prev>=0) ? prev : mSongs.size()-1;
+        int prev = sCurrentIdx - 1;
+        sCurrentIdx = (prev>=0) ? prev : sSongs.size()-1;
         sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
     }
 
     public void next() {
         if (!checkSongs("next")) return;
-        int next = mCurrentIdx + 1;
-        mCurrentIdx = (next<mSongs.size()) ? next : 0;
+        int next = sCurrentIdx + 1;
+        sCurrentIdx = (next< sSongs.size()) ? next : 0;
         sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
     }
 
     private boolean checkSongs(@NonNull String forMethod) {
-        final boolean haveSongs = mSongs!=null && !mSongs.isEmpty();
+        final boolean haveSongs = sSongs !=null && !sSongs.isEmpty();
         if (!haveSongs) {
             Log.e(TAG, forMethod.concat(" called but playlist is empty"));
         }
@@ -192,8 +199,8 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
         Context appContext = mService.getApplicationContext();
         Intent playerIntent = new Intent(appContext, PlayerService.class);
         playerIntent.setAction(action);
-        playerIntent.putExtra(TopSongsFragment.Key.CURRENT_SONG, mCurrentIdx);
-        playerIntent.putExtra(TopSongsFragment.Key.SONGS_PARCEL, mSongs);
+        playerIntent.putExtra(TopSongsFragment.Key.CURRENT_SONG, sCurrentIdx);
+        playerIntent.putExtra(TopSongsFragment.Key.SONGS_PARCEL, sSongs);
         mService.onStartCommand(playerIntent, 0, 0);
     }
 
@@ -209,8 +216,8 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
         PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
         mService = binder.getService();
         binder.registerListener(this);
-        if (mAutoPlay && !mSongs.isEmpty()) {
-            playAt(mCurrentIdx);
+        if (mAutoPlay && !sSongs.isEmpty()) {
+            playAt(sCurrentIdx);
         }
     }
 

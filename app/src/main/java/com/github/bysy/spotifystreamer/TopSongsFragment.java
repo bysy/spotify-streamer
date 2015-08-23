@@ -42,7 +42,7 @@ import retrofit.client.Response;
  * ShouldLaunchDialogPlayer to signal if they prefer a dialog player or activity player.
  */
 public class TopSongsFragment extends Fragment {
-    private static final String PLAYER_FRAGMENT_TAG = "PLAYER_FRAGMENT_TAG";
+    static final String PLAYER_FRAGMENT_TAG = "PLAYER_FRAGMENT_TAG";
 
     public static class Key {
         public static final String SONGS_PARCEL = "SONGS_PARCEL";
