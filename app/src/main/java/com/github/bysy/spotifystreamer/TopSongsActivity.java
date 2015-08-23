@@ -52,7 +52,7 @@ public class TopSongsActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_top_songs, menu);
+        getMenuInflater().inflate(R.menu.menu_song_selection, menu);
         return true;
     }
 
