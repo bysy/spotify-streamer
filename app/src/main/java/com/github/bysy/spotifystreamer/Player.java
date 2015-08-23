@@ -33,6 +33,8 @@ import java.util.Set;
 public class Player extends Fragment implements ServiceConnection, PlayerService.OnStateChange {
     private static final String SHARED_PLAYER = "SHARED_PLAYER";
     private static final String TAG = Player.class.getSimpleName();
+    private static final String CURRENT_IDX_KEY = "CURRENT_IDX_KEY";
+    private static final String SONGS_KEY = "SONGS_KEY";
     private ArrayList<SongInfo> mSongs = null;
     private int mCurrentIdx = -1;
     private PlayerService mService;
@@ -68,12 +70,24 @@ public class Player extends Fragment implements ServiceConnection, PlayerService
     public void onCreate(Bundle savedInstanceState) {
         setRetainInstance(true);
         super.onCreate(savedInstanceState);
+        if (savedInstanceState!=null) {
+            Log.d(TAG, "Restoring player state from bundle");
+            mCurrentIdx = savedInstanceState.getInt(CURRENT_IDX_KEY);
+            mSongs = savedInstanceState.getParcelableArrayList(SONGS_KEY);
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(CURRENT_IDX_KEY, mCurrentIdx);
+        outState.putParcelableArrayList(SONGS_KEY, mSongs);
     }
 
     void initialize(Context context) {
