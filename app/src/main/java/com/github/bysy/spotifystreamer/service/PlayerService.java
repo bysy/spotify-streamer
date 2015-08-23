@@ -7,11 +7,13 @@ package com.github.bysy.spotifystreamer.service;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -74,6 +76,15 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 .setContentTitle("Playing ".concat(song.name))
                 .setContentText("by ".concat(artist))
                 .setOngoing(true);
+        // Set lockscreen visibility
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final boolean showOnLockScreen =
+                prefs.getBoolean(getString(R.string.pref_notification_key), false);
+        if (showOnLockScreen) {
+            builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        } else {
+            builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
+        }
         TaskStackBuilder stack = TaskStackBuilder.create(this);
         stack.addParentStack(PlayerActivity.class);
         stack.addNextIntent(intent);

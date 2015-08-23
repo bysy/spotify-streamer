@@ -6,6 +6,7 @@ package com.github.bysy.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
         setContentView(R.layout.activity_main);
         mIsMultiPane = findViewById(R.id.multipane_detail_container)!=null;
         // In multi-pane mode, the player is tied to our fragment manager

@@ -7,7 +7,7 @@
     <CheckBoxPreference
         android:key="@string/pref_notification_key"
         android:title="Show player notification"
-        android:summary="When enabled you can control the player from the notification drawer"
+        android:summary="Control the player from your lockscreen (Lollipop and later)"
         android:defaultValue="true" />
     <EditTextPreference
         android:key="@string/pref_locale_key"
