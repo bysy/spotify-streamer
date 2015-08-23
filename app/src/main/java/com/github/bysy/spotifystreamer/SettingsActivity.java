@@ -7,32 +7,50 @@ package com.github.bysy.spotifystreamer;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
-import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.Toolbar;
+import android.view.View;
+
+import com.example.android.supportv7.app.AppCompatPreferenceActivity;
 
 
 /**
- * Settings. Based on trimmed-down AndroidStudio-generated settings activity.
+ * Settings.
  */
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends AppCompatPreferenceActivity {
 
     @SuppressWarnings("deprecation")  // use deprecated methods because we are targeting API 10
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Add 'general' preferences, defined in the XML file
+        // I really didn't like the black checkbox on an already
+        // dark background. Where was my accent color? Bumping the min Sdk
+        // just for a nicer settings screen didn't seem worth it. It turns
+        // out we can display any activity with material-ish styling thanks
+        // to AppCompatDelegate. The sample AppCompatPreferenceActivity
+        // implementation is just what we need.
+        // As an added complication, the most recent compat library
+        // will not allow a theme with ActionBar in conjunction with
+        // AppCompatDelegate. So if we want an action bar, nice styling,
+        // and backwards compatibility, we need to add our own toolbar.
+        // Sources consulted: Chris Bane's blog and SO answers
+        // provided the important ideas.
+        setContentView(R.layout.activity_settings);
         addPreferencesFromResource(R.xml.pref_general);
-
-        // For all preferences, attach an OnPreferenceChangeListener so the UI summary can be
-        // updated when the preference changes.
-        bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_locale_key)));
+        View actionBarView = findViewById(R.id.action_bar);
+        if (actionBarView!=null && actionBarView instanceof Toolbar) {
+            setSupportActionBar((Toolbar) actionBarView);
+        }
+        bindGenericSummaryToValue(findPreference(getString(R.string.pref_locale_key)));
     }
+
+    // Rest of file based on trimmed-down AndroidStudio-generated settings activity.
 
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
      */
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+    private static Preference.OnPreferenceChangeListener sUpdateSummaryListener = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
@@ -65,15 +83,15 @@ public class SettingsActivity extends PreferenceActivity {
      * immediately updated upon calling this method. The exact display format is
      * dependent on the type of preference.
      *
-     * @see #sBindPreferenceSummaryToValueListener
+     * @see #sUpdateSummaryListener
      */
-    private static void bindPreferenceSummaryToValue(Preference preference) {
+    private static void bindGenericSummaryToValue(Preference preference) {
         // Set the listener to watch for value changes.
-        preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+        preference.setOnPreferenceChangeListener(sUpdateSummaryListener);
 
         // Trigger the listener immediately with the preference's
         // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+        sUpdateSummaryListener.onPreferenceChange(preference,
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())
                         .getString(preference.getKey(), ""));
