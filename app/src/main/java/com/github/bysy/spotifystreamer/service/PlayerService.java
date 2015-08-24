@@ -33,7 +33,7 @@ import java.io.IOException;
 /**
  * Provide a service to stream songs.
  */
-public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener {
+public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener {
     private static final String ACTION_NULL = "ACTION_NULL";
     private static final int NOTIFICATION_ID = 234500001;
     private static String TAG = PlayerService.class.getSimpleName();
@@ -51,6 +51,14 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public static final String ACTION_PREVIOUS = "ACTION_PREVIOUS";
     public static final String ACTION_NEXT = "ACTION_NEXT";
     public static final String ACTION_STOP = "ACTION_STOP";
+    private AudioManager mAudioManager;
+
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+        if (focusChange!=AudioManager.AUDIOFOCUS_GAIN) {
+            mPlaylistController.pause();
+        }
+    }
 
     public interface OnStateChange {
         void onStateChange();
@@ -179,13 +187,19 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         final int mode = START_STICKY;
         boolean success;
         final String action = intent==null ? ACTION_NULL : intent.getAction();
         switch (action) {
             case ACTION_NEW_SONG:
-                success = handleNewPlaylist(intent);
+                success = requestAudioFocus() && handleNewPlaylist(intent);
                 break;
             case ACTION_PAUSE:
                 success = true;
@@ -201,9 +215,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 }
                 break;
             case ACTION_RESUME:
+                final boolean haveFocus = requestAudioFocus();
                 success = true;
                 if (mMediaPlayer==null) {
-                    success = initializeIfNecessary(intent);
+                    success = haveFocus && initializeIfNecessary(intent);
                 }
                 if (!success) break;
                 try {
@@ -237,6 +252,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             case ACTION_STOP:
                 success = true;
                 if (mMediaPlayer!=null) mMediaPlayer.reset();
+                abandonAudioFocus();
                 mIsForeground = false;
                 stopForeground(true);
                 break;
@@ -256,6 +272,18 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             Log.d(TAG, action.concat(": Failed"));
         }
         return mode;
+    }
+
+    private boolean requestAudioFocus() {
+        int ret = mAudioManager.requestAudioFocus(this,
+                AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        Log.v(TAG, "AudioFocus: " + (ret==AudioManager.AUDIOFOCUS_GAIN ? "Yes" : "No"));
+        return ret==AudioManager.AUDIOFOCUS_GAIN;
+    }
+
+    private void abandonAudioFocus() {
+        mAudioManager.abandonAudioFocus(this);
+        Log.v(TAG, "Abandoned audio focus");
     }
 
     private boolean initializeIfNecessary(Intent intent) {
@@ -304,6 +332,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         super.onDestroy();
         mMediaPlayer.release();
         mMediaPlayer = null;
+        abandonAudioFocus();
     }
 
     @Override

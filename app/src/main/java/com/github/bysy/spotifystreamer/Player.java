@@ -150,7 +150,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         mService.showForegroundNotification(getCurrentSong());
     }
 
-    void pause() {
+    public void pause() {
         if (!checkSongs("pause")) return;
         sendPlayerCommand(PlayerService.ACTION_PAUSE);
     }
