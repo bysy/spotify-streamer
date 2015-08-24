@@ -24,19 +24,16 @@ import android.widget.TextView;
 import com.github.bysy.spotifystreamer.data.SongInfo;
 
 /**
- * Play a song. Containing Activity needs to implement interface GetPlayer
+ * Display the player controls. Containing Activity needs to implement interface GetPlayer.
  */
 public class PlayerDialog extends DialogFragment implements Player.OnStateChange {
-    //  Player state is in separate retained fragment.
-    // That makes it easier to bind to service and use
-    // callbacks and generally makes things simpler.
     private static final String TAG = PlayerDialog.class.getSimpleName();
     private ImageView mAlbumImageView;
     private TextView mArtistTextView;
     private TextView mAlbumTextView;
     private TextView mSongTextView;
     private ImageButton mPlayButton;
-    private Player mPlayer;
+    private Player mPlayer;  // handles player state
     private ShareActionProvider mShareActionProvider;
 
     public PlayerDialog() {
@@ -158,6 +155,8 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         mPlayer = ((GetPlayer) parent).getPlayer();
         mPlayer.registerPlayChangeListener(this);
     }
+
+    // Update views and share intent in response to play state changes
 
     @Override
     public void onSongChange(@NonNull SongInfo song) {
