@@ -46,17 +46,25 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
 
     private PlayerService mService;
     private boolean mAutoPlay = false;
-    private Set<OnPlayStateChange> mPlayListeners = new HashSet<>(2);
+    private Set<OnStateChange> mPlayListeners = new HashSet<>(2);
 
-    public interface OnPlayStateChange {
-        void onPlayStateChange(boolean isPlaying, @Nullable SongInfo maybeSong);
+    public interface OnStateChange {
+        void onPlayStateChange(boolean isPlaying);
+        void onSongChange(@NonNull SongInfo song);
     }
 
-    public void registerPlayChangeListener(OnPlayStateChange listener) {
+    /**
+     * Register a play change listener.
+     * The listener will receive callbacks when the play state changes
+     * between play and pause and when the current song changes. The
+     * listener is also updated once upon registering.
+     */
+    public void registerPlayChangeListener(OnStateChange listener) {
         mPlayListeners.add(listener);
+        updateListener(listener);
     }
 
-    public void unregisterPlayChangeListener(OnPlayStateChange listener) {
+    public void unregisterPlayChangeListener(OnStateChange listener) {
         mPlayListeners.remove(listener);
     }
 
@@ -180,9 +188,17 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     }
 
     @Override
-    public void onStateChange(boolean isPlaying) {
-        for (OnPlayStateChange listener : mPlayListeners) {
-            listener.onPlayStateChange(isPlaying, getCurrentSong());
+    public void onStateChange() {
+        for (OnStateChange listener : mPlayListeners) {
+            updateListener(listener);
+        }
+    }
+
+    private void updateListener(OnStateChange listener) {
+        listener.onPlayStateChange(isPlaying());
+        final SongInfo song = getCurrentSong();
+        if (song!=null) {
+            listener.onSongChange(getCurrentSong());
         }
     }
 

@@ -8,7 +8,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
@@ -28,7 +27,7 @@ import com.github.bysy.spotifystreamer.data.SongInfo;
 /**
  * Play a song. Containing Activity needs to implement interface GetPlayer
  */
-public class PlayerDialog extends DialogFragment implements Player.OnPlayStateChange {
+public class PlayerDialog extends DialogFragment implements Player.OnStateChange {
     //  Player state is in separate retained fragment.
     // That makes it easier to bind to service and use
     // callbacks and generally makes things simpler.
@@ -151,23 +150,17 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
 
     private void onPrevButtonClick() {
         mPlayer.previous();
-        setViewData();
-        setPlayButtonView();
     }
 
     private void onPlayButtonClick() {
         mPlayer.togglePlayState();
-        setPlayButtonView();
     }
 
     private void onNextButtonClick() {
         mPlayer.next();
-        setViewData();
-        setPlayButtonView();
     }
 
-    private void setViewData() {
-        final SongInfo currentSong = mPlayer.getCurrentSong();
+    private void setViewData(SongInfo currentSong) {
         if (currentSong==null) return;
         mArtistTextView.setText(currentSong.getArtistSummary());
         mAlbumTextView.setText(currentSong.albumName);
@@ -186,15 +179,17 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
         }
         mPlayer = ((GetPlayer) parent).getPlayer();
         mPlayer.registerPlayChangeListener(this);
-        setViewData();
     }
 
     @Override
-    public void onPlayStateChange(boolean isPlaying, @Nullable SongInfo song) {
+    public void onSongChange(@NonNull SongInfo song) {
+        setViewData(song);
+        setShareIntent(song);
+    }
+
+    @Override
+    public void onPlayStateChange(boolean isPlaying) {
         if (mPlayButton==null) return;
         setPlayButtonView(isPlaying);
-        if (isPlaying && song!=null) {
-            setShareIntent(song);
-        }
     }
 }

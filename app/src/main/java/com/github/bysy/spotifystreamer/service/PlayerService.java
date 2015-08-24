@@ -53,7 +53,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public static final String ACTION_STOP = "ACTION_STOP";
 
     public interface OnStateChange {
-        void onStateChange(boolean isPlaying);
+        void onStateChange();
     }
 
     public boolean isPlaying() {
@@ -249,7 +249,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         }
         final boolean isPlaying = isPlaying();
         updateNotification(isPlaying);
-        if (mListener!=null) mListener.onStateChange(isPlaying);
+        if (mListener!=null) mListener.onStateChange();
         if (success) {
             Log.d(TAG, action.concat(": Success"));
         } else {
@@ -309,13 +309,13 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
-        if (mListener!=null) mListener.onStateChange(true);
+        if (mListener!=null) mListener.onStateChange();
         updateNotification(true);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        if (mListener!=null) mListener.onStateChange(false);
+        if (mListener!=null) mListener.onStateChange();
         updateNotification(false);
     }
 }
