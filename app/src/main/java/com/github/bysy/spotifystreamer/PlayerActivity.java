@@ -7,7 +7,9 @@ package com.github.bysy.spotifystreamer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -16,8 +18,9 @@ import com.github.bysy.spotifystreamer.data.SongInfo;
 import java.util.ArrayList;
 
 /** Play a song. */
-public class PlayerActivity extends AppCompatActivity implements PlayerDialog.GetPlayer {
+public class PlayerActivity extends AppCompatActivity implements PlayerDialog.HasPlayer {
     Player mPlayer;
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,8 +52,13 @@ public class PlayerActivity extends AppCompatActivity implements PlayerDialog.Ge
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_player, menu);
+        MenuItem item = menu.findItem(R.id.action_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        final SongInfo song = mPlayer.getCurrentSong();
+        if (mShareActionProvider!=null && song!=null) {
+            mShareActionProvider.setShareIntent(PlayerDialog.getShareIntent(this, song));
+        }
         return true;
     }
 
@@ -73,5 +81,12 @@ public class PlayerActivity extends AppCompatActivity implements PlayerDialog.Ge
     @Override
     public Player getPlayer() {
         return mPlayer;
+    }
+
+    @Override
+    public void onNewShareIntent(@NonNull Intent shareIntent) {
+        if (mShareActionProvider!=null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
     }
 }

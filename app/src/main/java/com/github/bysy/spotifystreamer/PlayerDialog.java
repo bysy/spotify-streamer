@@ -5,16 +5,12 @@
 package com.github.bysy.spotifystreamer;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -24,7 +20,7 @@ import android.widget.TextView;
 import com.github.bysy.spotifystreamer.data.SongInfo;
 
 /**
- * Display the player controls. Containing Activity needs to implement interface GetPlayer.
+ * Display the player controls. Containing Activity needs to implement interface HasPlayer.
  */
 public class PlayerDialog extends DialogFragment implements Player.OnStateChange {
     private static final String TAG = PlayerDialog.class.getSimpleName();
@@ -34,13 +30,14 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
     private TextView mSongTextView;
     private ImageButton mPlayButton;
     private Player mPlayer;  // handles player state
-    private ShareActionProvider mShareActionProvider;
 
     public PlayerDialog() {
     }
 
-    public interface GetPlayer {
+    public interface HasPlayer {
         @NonNull Player getPlayer();
+        // Let activity handle share intent.
+        void onNewShareIntent(@NonNull Intent shareIntent);
     }
 
     @Override
@@ -85,31 +82,13 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         return view;
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_player_dialog, menu);
-        MenuItem item = menu.findItem(R.id.action_share);
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-        final SongInfo song = mPlayer.getCurrentSong();
-        if (mShareActionProvider!=null && song!=null) {
-            mShareActionProvider.setShareIntent(getShareIntent(song));
-        }
-    }
-
-    private void setShareIntent(SongInfo song) {
-        if (mShareActionProvider!=null) {
-            mShareActionProvider.setShareIntent(getShareIntent(song));
-        }
-    }
-
-    private Intent getShareIntent(SongInfo song) {
+    static Intent getShareIntent(Context context, SongInfo song) {
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         //noinspection deprecation since we target older API
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
         shareIntent.setType("text/plain");
         final String shareText =
-                getString(R.string.app_name_hashtag) + ": Loving this track\n" +
+                context.getString(R.string.app_name_hashtag) + ": Loving this track\n" +
                         song.externalSpotifyUrl;
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
         return shareIntent;
@@ -147,11 +126,11 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         final Activity parent = getActivity();
-        if (!(parent instanceof GetPlayer)) {
+        if (!(parent instanceof HasPlayer)) {
             throw new IllegalStateException(
-                    TAG.concat(": Containing Activity doesn't implement GetPlayer"));
+                    TAG.concat(": Containing Activity doesn't implement HasPlayer"));
         }
-        mPlayer = ((GetPlayer) parent).getPlayer();
+        mPlayer = ((HasPlayer) parent).getPlayer();
         mPlayer.registerPlayChangeListener(this);
     }
 
@@ -160,7 +139,8 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
     @Override
     public void onSongChange(@NonNull SongInfo song) {
         setViewData(song);
-        setShareIntent(song);
+        final Activity parent = getActivity();
+        ((HasPlayer) parent).onNewShareIntent(getShareIntent(parent, song));
     }
 
     @Override

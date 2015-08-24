@@ -9,20 +9,24 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.github.bysy.spotifystreamer.data.ArtistInfo;
+import com.github.bysy.spotifystreamer.data.SongInfo;
 
 
 public class MainActivity extends AppCompatActivity
         implements ArtistSearchFragment.OnArtistSelected,
         TopSongsFragment.ShouldLaunchDialogPlayer,
-        PlayerDialog.GetPlayer {
+        PlayerDialog.HasPlayer {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private Player mPlayer = null;  // only available in multi-pane mode
+    private ShareActionProvider mShareActionProvider;
 
     @Override
     public boolean shouldLaunchDialogPlayer() {
@@ -39,6 +43,13 @@ public class MainActivity extends AppCompatActivity
         return mPlayer;
     }
 
+    @Override
+    public void onNewShareIntent(@NonNull Intent shareIntent) {
+        if (mShareActionProvider!=null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
+    }
+
     static class Key {
         static final String ARTIST_NAME = "ARTIST_NAME";
         static final String ARTIST_ID = "ARTIST_ID";
@@ -53,7 +64,7 @@ public class MainActivity extends AppCompatActivity
         PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
         setContentView(R.layout.activity_main);
         mIsMultiPane = findViewById(R.id.multipane_detail_container)!=null;
-        // In multi-pane mode, the player is tied to our fragment manager
+        // In multi-pane mode, the player is tied to us
         if (mIsMultiPane) {
             mPlayer = Player.getInstance();
             mPlayer.initialize(this);
@@ -86,8 +97,16 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_song_selection, menu);
+        if (mIsMultiPane) {
+            MenuItem item = menu.findItem(R.id.action_share);
+            item.setVisible(true);
+            mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+            final SongInfo song = mPlayer.getCurrentSong();
+            if (mShareActionProvider!=null && song!=null) {
+                mShareActionProvider.setShareIntent(PlayerDialog.getShareIntent(this, song));
+            }
+        }
         return true;
     }
 

@@ -8,6 +8,12 @@
     <item android:id="@+id/action_now_playing" android:title="@string/action_now_playing_label"
         android:orderInCategory="50" app:showAsAction="ifRoom"
         android:enabled="false" />
+    <item
+        android:id="@+id/action_share"
+        android:title="@string/action_share_label"
+        android:visible="false"
+        app:showAsAction="ifRoom"
+        app:actionProviderClass="android.support.v7.widget.ShareActionProvider" />
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
 </menu>
