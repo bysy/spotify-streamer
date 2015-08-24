@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -100,8 +99,9 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         inflater.inflate(R.menu.menu_player_dialog, menu);
         MenuItem item = menu.findItem(R.id.action_share);
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-        if (mShareActionProvider==null) {
-            Log.d("TAG", "ShareActionProvider is unexpectedly null");
+        final SongInfo song = mPlayer.getCurrentSong();
+        if (mShareActionProvider!=null && song!=null) {
+            mShareActionProvider.setShareIntent(getShareIntent(song));
         }
     }
 
@@ -118,7 +118,7 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         shareIntent.setType("text/plain");
         final String shareText =
                 getString(R.string.app_name_hashtag) + ": Loving this track\n" +
-                song.externalSpotifyUrl;
+                        song.externalSpotifyUrl;
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
         return shareIntent;
     }
@@ -132,12 +132,7 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
     @Override
     public void onResume() {
         mPlayer.registerPlayChangeListener(this);
-        setPlayButtonView();
         super.onResume();
-    }
-
-    private void setPlayButtonView() {
-        setPlayButtonView(mPlayer.isPlaying());
     }
 
     private void setPlayButtonView(boolean isPlaying) {

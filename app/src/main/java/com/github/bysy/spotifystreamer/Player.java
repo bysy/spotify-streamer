@@ -43,6 +43,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     private boolean mHasPlaylist = false;
     private ArrayList<SongInfo> mSongs = null;
     private int mCurrentIdx = -1;
+    private SongInfo mLastSong;
 
     private PlayerService mService;
     private boolean mAutoPlay = false;
@@ -61,7 +62,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
      */
     public void registerPlayChangeListener(OnStateChange listener) {
         mPlayListeners.add(listener);
-        updateListener(listener);
+        updateListener(listener, true);
     }
 
     public void unregisterPlayChangeListener(OnStateChange listener) {
@@ -190,16 +191,19 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     @Override
     public void onStateChange() {
         for (OnStateChange listener : mPlayListeners) {
-            updateListener(listener);
+            updateListener(listener, false);
         }
     }
 
-    private void updateListener(OnStateChange listener) {
+    private void updateListener(OnStateChange listener, boolean doFullUpdate) {
         listener.onPlayStateChange(isPlaying());
         final SongInfo song = getCurrentSong();
         if (song!=null) {
-            listener.onSongChange(getCurrentSong());
+            if (song!=mLastSong || doFullUpdate) {
+                listener.onSongChange(getCurrentSong());
+            }
         }
+        mLastSong = song;
     }
 
     @Override
