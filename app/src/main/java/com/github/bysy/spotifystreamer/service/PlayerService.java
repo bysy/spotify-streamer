@@ -27,12 +27,10 @@ import android.widget.RemoteViews;
 import com.github.bysy.spotifystreamer.MainActivity;
 import com.github.bysy.spotifystreamer.Player;
 import com.github.bysy.spotifystreamer.R;
-import com.github.bysy.spotifystreamer.TopSongsFragment;
 import com.github.bysy.spotifystreamer.data.SongInfo;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Provide a service to stream songs.
@@ -42,14 +40,14 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     private static final int NOTIFICATION_ID = 234500001;
     private static String TAG = PlayerService.class.getSimpleName();
     private OnStateChange mListener = null;
-    private ArrayList<SongInfo> mSongs;
+    private SongInfo mSong;
     private MediaPlayer mMediaPlayer;
     private Player mPlaylistController;
-    private int mCurrentIndex = 0;
     private boolean mIsForeground = false;
 
-    public static final String ACTION_NEW_PLAYLIST = "ACTION_NEW_PLAYLIST";
-    public static final String ACTION_CHANGE_SONG = "ACTION_CHANGE_SONG";
+    public static final String SONG_KEY = "SONG_KEY";
+
+    public static final String ACTION_NEW_SONG = "ACTION_NEW_SONG";
     public static final String ACTION_PAUSE = "ACTION_PAUSE";
     public static final String ACTION_RESUME = "ACTION_RESUME";
     public static final String ACTION_PREVIOUS = "ACTION_PREVIOUS";
@@ -186,7 +184,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         boolean success;
         final String action = intent==null ? ACTION_NULL : intent.getAction();
         switch (action) {
-            case ACTION_NEW_PLAYLIST:
+            case ACTION_NEW_SONG:
                 success = handleNewPlaylist(intent);
                 break;
             case ACTION_PAUSE:
@@ -265,10 +263,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         } else {
             mMediaPlayer.reset();
         }
-        mCurrentIndex = intent.getIntExtra(TopSongsFragment.Key.CURRENT_SONG, 0);
-        if (mSongs==null) {
-            mSongs = intent.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);
-            if (mSongs==null || mSongs.isEmpty()) {
+        if (mSong==null) {
+            mSong = intent.getParcelableExtra(SONG_KEY);
+            if (mSong==null) {
                 return false;
             }
         }
@@ -277,15 +274,14 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     /** Start playing a new list of songs. Returns whether media player was correctly set up. */
     private boolean handleNewPlaylist(Intent intent) {
-        mSongs = intent.getParcelableArrayListExtra(TopSongsFragment.Key.SONGS_PARCEL);
+        mSong = intent.getParcelableExtra(SONG_KEY);
         return initializeIfNecessary(intent) && prepareAndStart();
     }
 
     private boolean prepareAndStart() {
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mMediaPlayer.setWakeMode(this, PowerManager.PARTIAL_WAKE_LOCK);
-        if (mCurrentIndex>=mSongs.size()) mCurrentIndex = 0;
-        final String previewUrl = mSongs.get(mCurrentIndex).previewUrl;
+        final String previewUrl = mSong.previewUrl;
         Log.d(TAG, "Trying to play ".concat(previewUrl));
         try {
             mMediaPlayer.setDataSource(previewUrl);

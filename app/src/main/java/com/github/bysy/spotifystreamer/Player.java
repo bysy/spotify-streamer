@@ -123,7 +123,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     void playAt(int index) {
         if (!checkSongs("playAt")) return;
         sCurrentIdx = Math.max(0, Math.min(index, sSongs.size()-1));
-        sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
+        sendPlayerCommand(PlayerService.ACTION_NEW_SONG);
         mService.showForegroundNotification(getCurrentSong());
     }
 
@@ -136,7 +136,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         if (!checkSongs("previous")) return;
         int prev = sCurrentIdx - 1;
         sCurrentIdx = (prev>=0) ? prev : sSongs.size()-1;
-        sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
+        sendPlayerCommand(PlayerService.ACTION_NEW_SONG);
         mService.showForegroundNotification(getCurrentSong());
     }
 
@@ -144,7 +144,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         if (!checkSongs("next")) return;
         int next = sCurrentIdx + 1;
         sCurrentIdx = (next< sSongs.size()) ? next : 0;
-        sendPlayerCommand(PlayerService.ACTION_NEW_PLAYLIST);
+        sendPlayerCommand(PlayerService.ACTION_NEW_SONG);
         mService.showForegroundNotification(getCurrentSong());
     }
 
@@ -166,8 +166,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         Context appContext = mService.getApplicationContext();
         Intent playerIntent = new Intent(appContext, PlayerService.class);
         playerIntent.setAction(action);
-        playerIntent.putExtra(TopSongsFragment.Key.CURRENT_SONG, sCurrentIdx);
-        playerIntent.putExtra(TopSongsFragment.Key.SONGS_PARCEL, sSongs);
+        playerIntent.putExtra(PlayerService.SONG_KEY, sSongs.get(sCurrentIdx));
         mService.onStartCommand(playerIntent, 0, 0);
     }
 
