@@ -95,6 +95,11 @@ public class SongInfo implements Parcelable {
         return numberOfArtists > 1;
     }
 
+    @NonNull
+    public String getArtistSummary() {
+        return isCollaboration() ? primaryArtistName.concat(" & others") : primaryArtistName;
+    }
+
     // Enforce instantiation via factory methods
     private SongInfo(Track spotifyTrack) {
         id = spotifyTrack.id;

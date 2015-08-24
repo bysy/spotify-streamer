@@ -107,15 +107,15 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         views.setOnClickPendingIntent(R.id.nextButton, nextIntent);
         views.setOnClickPendingIntent(R.id.stopButton, stopIntent);
 
+        final String artist = song.getArtistSummary();
+
         final int playPauseRes = isPlaying ? R.drawable.pause_icon : R.drawable.play_icon;
         views.setImageViewResource(R.id.playPauseButton, playPauseRes);
         views.setTextViewText(R.id.songNameView, song.name);
         views.setTextViewText(R.id.albumNameView, song.albumName);
-        views.setTextViewText(R.id.artistNameView, song.primaryArtistName);
+        views.setTextViewText(R.id.artistNameView, artist);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        final String artist = song.isCollaboration() ?
-                song.primaryArtistName.concat(" & others") : song.primaryArtistName;
         builder.setSmallIcon(R.drawable.play_icon)
                 .setContentTitle("Playing ".concat(song.name))
                 .setContentText("by ".concat(artist))

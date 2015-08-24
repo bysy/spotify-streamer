@@ -169,7 +169,7 @@ public class PlayerDialog extends DialogFragment implements Player.OnPlayStateCh
     private void setViewData() {
         final SongInfo currentSong = mPlayer.getCurrentSong();
         if (currentSong==null) return;
-        mArtistTextView.setText(currentSong.primaryArtistName);
+        mArtistTextView.setText(currentSong.getArtistSummary());
         mAlbumTextView.setText(currentSong.albumName);
         mSongTextView.setText(currentSong.name);
         final String imageUrl = currentSong.albumImageUrl;
