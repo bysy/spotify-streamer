@@ -101,11 +101,11 @@ public class TopSongsFragment extends Fragment {
                 final boolean launchDialog = (activity instanceof ShouldLaunchDialogPlayer) &&
                         ((ShouldLaunchDialogPlayer) activity).shouldLaunchDialogPlayer();
                 if (launchDialog) {
+                    Player player = Player.getInstance();
+                    player.setNewPlaylist(mSongs);
+                    player.setCurrentIndex(position);
+                    player.setAutoPlay(true);
                     PlayerDialog playerDialog = new PlayerDialog();
-                    Bundle args = new Bundle();
-                    args.putParcelableArrayList(Key.SONGS_PARCEL, mSongs);
-                    args.putInt(Key.CURRENT_SONG, position);
-                    playerDialog.setArguments(args);
                     playerDialog.show(getActivity().getSupportFragmentManager(),
                             PLAYER_FRAGMENT_TAG);
                 } else {
