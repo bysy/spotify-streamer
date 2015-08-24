@@ -53,11 +53,6 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_player_dialog, container, false);
@@ -75,19 +70,19 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPrevButtonClick();
+                mPlayer.previous();
             }
         });
         mPlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onPlayButtonClick();
+                mPlayer.togglePlayState();
             }
         });
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onNextButtonClick();
+                mPlayer.next();
             }
         });
         return view;
@@ -141,18 +136,6 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         } else {
             mPlayButton.setImageResource(R.drawable.play_icon);
         }
-    }
-
-    private void onPrevButtonClick() {
-        mPlayer.previous();
-    }
-
-    private void onPlayButtonClick() {
-        mPlayer.togglePlayState();
-    }
-
-    private void onNextButtonClick() {
-        mPlayer.next();
     }
 
     private void setViewData(SongInfo currentSong) {
