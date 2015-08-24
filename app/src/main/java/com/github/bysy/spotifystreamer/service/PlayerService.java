@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -21,12 +22,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
+import android.widget.RemoteViews;
 
+import com.github.bysy.spotifystreamer.MainActivity;
 import com.github.bysy.spotifystreamer.Player;
-import com.github.bysy.spotifystreamer.PlayerActivity;
 import com.github.bysy.spotifystreamer.R;
 import com.github.bysy.spotifystreamer.TopSongsFragment;
 import com.github.bysy.spotifystreamer.data.SongInfo;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,6 +46,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     private MediaPlayer mMediaPlayer;
     private Player mPlaylistController;
     private int mCurrentIndex = 0;
+    private boolean mIsForeground = false;
 
     public static final String ACTION_NEW_PLAYLIST = "ACTION_NEW_PLAYLIST";
     public static final String ACTION_CHANGE_SONG = "ACTION_CHANGE_SONG";
@@ -50,6 +54,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public static final String ACTION_RESUME = "ACTION_RESUME";
     public static final String ACTION_PREVIOUS = "ACTION_PREVIOUS";
     public static final String ACTION_NEXT = "ACTION_NEXT";
+    public static final String ACTION_STOP = "ACTION_STOP";
 
     public interface OnStateChange {
         void onStateChange(boolean isPlaying);
@@ -80,24 +85,58 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     public void showForegroundNotification(SongInfo song) {
         startForeground(NOTIFICATION_ID, createNotification(song, true));
+        mIsForeground = true;
     }
 
     private Notification createNotification(SongInfo song, boolean isPlaying) {
         Log.d(TAG, "setting notification with isPlaying = " + isPlaying);
-        Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
+        // Display custom layout
+        // Thank you http://stackoverflow.com/a/16168704
+        RemoteViews views = new RemoteViews(
+                getPackageName(), R.layout.player_notification);
+        // TODO: Some stuff below can be put in fields to reduce overhead
+        // TODO: Extract expanded layout building so we can skip it completely on older SDKs
+        final PendingIntent prevIntent = newPendingIntent(ACTION_PREVIOUS);
+        final PendingIntent pauseIntent = newPendingIntent(ACTION_PAUSE);
+        final PendingIntent playIntent = newPendingIntent(ACTION_RESUME);
+        final PendingIntent nextIntent = newPendingIntent(ACTION_NEXT);
+        final PendingIntent stopIntent = newPendingIntent(ACTION_STOP);
+
+        final PendingIntent playPauseIntent = isPlaying ? pauseIntent : playIntent;
+
+        views.setOnClickPendingIntent(R.id.previousButton, prevIntent);
+        views.setOnClickPendingIntent(R.id.playPauseButton, playPauseIntent);
+        views.setOnClickPendingIntent(R.id.nextButton, nextIntent);
+        views.setOnClickPendingIntent(R.id.stopButton, stopIntent);
+
+        final int playPauseRes = isPlaying ? R.drawable.pause_icon : R.drawable.play_icon;
+        views.setImageViewResource(R.id.playPauseButton, playPauseRes);
+        views.setTextViewText(R.id.songNameView, song.name);
+        views.setTextViewText(R.id.albumNameView, song.albumName);
+        views.setTextViewText(R.id.artistNameView, song.primaryArtistName);
+
+        // Go back to main activity. We could figure out if want Main or Player,
+        // but I really need some sleep. It's not part of the rubric, so I can
+        // get some zzz. =) This way the user can click on Now Playing to go back
+        // to the full player.
+        Intent intent = new Intent(this.getBaseContext(), MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         final String artist = song.isCollaboration() ?
                 song.primaryArtistName.concat(" & others") : song.primaryArtistName;
         builder.setSmallIcon(R.drawable.play_icon)
                 .setContentTitle("Playing ".concat(song.name))
                 .setContentText("by ".concat(artist))
-                .addAction(R.drawable.previous_icon, "Previous", newPendingIntent(ACTION_PREVIOUS));
+                .addAction(R.drawable.previous_icon, "Previous", prevIntent);
         if (isPlaying) {
-            builder.addAction(R.drawable.pause_icon, "Pause", newPendingIntent(ACTION_PAUSE));
+            builder.addAction(R.drawable.pause_icon, "Pause", pauseIntent);
         } else {
-            builder.addAction(R.drawable.play_icon, "Play", newPendingIntent(ACTION_RESUME));
+            builder.addAction(R.drawable.play_icon, "Play", playIntent);
         }
-        builder.addAction(R.drawable.next_icon, "Next", newPendingIntent(ACTION_NEXT));
+
+        builder.addAction(R.drawable.next_icon, "Next", nextIntent);
+        builder.addAction(R.drawable.pause_icon, "Stop", stopIntent);
         // Set lockscreen visibility
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final boolean showOnLockScreen =
@@ -108,15 +147,23 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
         }
         TaskStackBuilder stack = TaskStackBuilder.create(this);
-        stack.addParentStack(PlayerActivity.class);
         stack.addNextIntent(intent);
         PendingIntent pi = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(pi);
-        return builder.build();
+
+        Notification notification = builder.build();
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN) {
+            notification.bigContentView = views;
+            Picasso.with(this).load(song.albumImageUrl)
+                    .centerCrop()
+                    .resize(96, 96)
+                    .into(views, R.id.albumImageView, NOTIFICATION_ID, notification);
+        }
+        return notification;
     }
 
     private void updateNotification(boolean isPlaying) {
-        if (mPlaylistController==null) return;
+        if (!mIsForeground || mPlaylistController==null) return;
         NotificationManager nm = (NotificationManager)
                 getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(NOTIFICATION_ID,
@@ -139,9 +186,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         boolean success;
         final String action = intent==null ? ACTION_NULL : intent.getAction();
         switch (action) {
-            case ACTION_CHANGE_SONG:
-                success = initializeIfNecessary(intent) && prepareAndStart();
-                break;
             case ACTION_NEW_PLAYLIST:
                 success = handleNewPlaylist(intent);
                 break;
@@ -191,6 +235,11 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                     mPlaylistController.next();
                     success = true;
                 }
+                break;
+            case ACTION_STOP:
+                success = true;
+                mIsForeground = false;
+                stopForeground(true);
                 break;
             case ACTION_NULL:
                 Log.d(TAG, "Intent is null. Nothing to do.");

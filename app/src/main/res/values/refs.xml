@@ -8,4 +8,5 @@
     <drawable name="play_icon">@android:drawable/ic_media_play</drawable>
     <drawable name="previous_icon">@android:drawable/ic_media_previous</drawable>
     <drawable name="next_icon">@android:drawable/ic_media_next</drawable>
+    <drawable name="close_icon">@android:drawable/ic_menu_close_clear_cancel</drawable>
 </resources>
