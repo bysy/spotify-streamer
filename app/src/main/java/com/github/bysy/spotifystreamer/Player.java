@@ -24,6 +24,10 @@ import java.util.Set;
  * Manage player state.
  */
 public class Player implements ServiceConnection, PlayerService.OnStateChange {
+    // The idea for this class is to shield clients from the need to bind to
+    // the service. The service itself only knows how to play a single song;
+    // we manage the playlist here. Lastly, the service delegates back to us
+    // if it receives a command to play the previous or next song.
     private static final String TAG = Player.class.getSimpleName();
 
     // Keep playlist state in static fields. That works nicely because when our app
@@ -158,12 +162,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     }
 
     private void sendPlayerCommand(@NonNull String action) {
-        // This method sends the full playlist each time. That's inefficient
-        // but it means we are in control of the position in the playlist
-        // no matter if the service has to be recreated without having
-        // to bind to it. As a half-way optimization, PlayerService only
-        // copies in the playlist when it has to be recreated. Otherwise,
-        // it retains the previous playlist.
+        // Send the given action along with the current song.
         Context appContext = mService.getApplicationContext();
         Intent playerIntent = new Intent(appContext, PlayerService.class);
         playerIntent.setAction(action);
