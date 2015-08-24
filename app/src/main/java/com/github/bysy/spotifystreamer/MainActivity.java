@@ -24,9 +24,15 @@ public class MainActivity extends AppCompatActivity
         TopSongsFragment.ShouldLaunchDialogPlayer,
         PlayerDialog.HasPlayer {
 
+    static class Key {
+        static final String ARTIST_NAME = "ARTIST_NAME";
+        static final String ARTIST_ID = "ARTIST_ID";
+    }
+    private static final String DETAIL_FRAGMENT_TAG = "DETAIL_FRAGMENT_TAG";
     private static final String TAG = MainActivity.class.getSimpleName();
     private Player mPlayer = null;  // only available in multi-pane mode
     private ShareActionProvider mShareActionProvider;
+    private boolean mIsMultiPane = false;
 
     @Override
     public boolean shouldLaunchDialogPlayer() {
@@ -49,14 +55,6 @@ public class MainActivity extends AppCompatActivity
             mShareActionProvider.setShareIntent(shareIntent);
         }
     }
-
-    static class Key {
-        static final String ARTIST_NAME = "ARTIST_NAME";
-        static final String ARTIST_ID = "ARTIST_ID";
-    }
-    private static final String DETAIL_FRAGMENT_TAG = "DETAIL_FRAGMENT_TAG";
-
-    private boolean mIsMultiPane = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
