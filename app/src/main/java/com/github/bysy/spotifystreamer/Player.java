@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Manage player state.
+ * Manage player state via a singleton.
  */
 public class Player implements ServiceConnection, PlayerService.OnStateChange {
     // The idea for this class is to shield clients from the need to bind to
@@ -30,17 +30,19 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     // if it receives a command to play the previous or next song.
     private static final String TAG = Player.class.getSimpleName();
 
-    // Keep playlist state in static fields. That works nicely because when our app
-    // is restored after it was killed completely, we don't really want to recreate
-    // these fields to their old values.
+    // The singleton works well here because when our app is restored after it
+    // was killed completely, we don't really want to recreate the playlist with
+    // its old state.
     // If desired however, we could easily use GSON with a SharedPreference and
     // restore appropriately. Alternatively, we could build a ContentProvider.
     // Originally, I favored the ContentProvider approach because it would also
     // let us cache queries. But since we're not supposed to save the preview
-    // audio files, we'd have to fire up the radio in any event.
-    private static boolean sHasPlaylist = false;
-    private static ArrayList<SongInfo> sSongs = null;
-    private static int sCurrentIdx = -1;
+    // audio files, we'd have to fire up the radio anyway.
+    private static Player sInstance;
+
+    private boolean mHasPlaylist = false;
+    private ArrayList<SongInfo> mSongs = null;
+    private int mCurrentIdx = -1;
 
     private PlayerService mService;
     private boolean mAutoPlay = false;
@@ -58,8 +60,15 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         mPlayListeners.remove(listener);
     }
 
-    static boolean hasPlaylist() {
-        return sHasPlaylist;
+    public static Player getInstance() {
+        if (sInstance==null) {
+            sInstance = new Player();
+        }
+        return sInstance;
+    }
+
+    public boolean hasPlaylist() {
+        return mHasPlaylist;
     }
 
     /** Bind to the service. Call this before invoking play state methods (playAt() etc). */
@@ -76,26 +85,26 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
             Log.w(TAG, "Cannot play empty playlist");
             return;
         }
-        sHasPlaylist = true;
-        sSongs = songs;
-        sCurrentIdx = 0;
+        mHasPlaylist = true;
+        mSongs = songs;
+        mCurrentIdx = 0;
     }
 
     public void setCurrentIndex(int currentIndex) {
-        sCurrentIdx = currentIndex;
+        mCurrentIdx = currentIndex;
     }
 
     public void setAutoPlay(boolean autoPlay) {
         mAutoPlay = autoPlay;
-        if (mAutoPlay && mService!=null && !sSongs.isEmpty()) {
-            playAt(sCurrentIdx);  // otherwise plays when service is connected
+        if (mAutoPlay && mService!=null && !mSongs.isEmpty()) {
+            playAt(mCurrentIdx);  // otherwise plays when service is connected
         }
     }
 
     /** Return current song. Playlist must have been set prior to calling this method.*/
     public @Nullable SongInfo getCurrentSong() {
-        if (sSongs==null) return null;
-        return sSongs.get(sCurrentIdx);
+        if (mSongs ==null) return null;
+        return mSongs.get(mCurrentIdx);
     }
 
     public boolean isPlaying() {
@@ -127,7 +136,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
      */
     void playAt(int index) {
         if (!checkSongs("playAt")) return;
-        sCurrentIdx = Math.max(0, Math.min(index, sSongs.size()-1));
+        mCurrentIdx = Math.max(0, Math.min(index, mSongs.size()-1));
         sendPlayerCommand(PlayerService.ACTION_NEW_SONG);
         mService.showForegroundNotification(getCurrentSong());
     }
@@ -139,22 +148,22 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
 
     public void previous() {
         if (!checkSongs("previous")) return;
-        int prev = sCurrentIdx - 1;
-        sCurrentIdx = (prev>=0) ? prev : sSongs.size()-1;
+        int prev = mCurrentIdx - 1;
+        mCurrentIdx = (prev>=0) ? prev : mSongs.size()-1;
         sendPlayerCommand(PlayerService.ACTION_NEW_SONG);
         mService.showForegroundNotification(getCurrentSong());
     }
 
     public void next() {
         if (!checkSongs("next")) return;
-        int next = sCurrentIdx + 1;
-        sCurrentIdx = (next< sSongs.size()) ? next : 0;
+        int next = mCurrentIdx + 1;
+        mCurrentIdx = (next< mSongs.size()) ? next : 0;
         sendPlayerCommand(PlayerService.ACTION_NEW_SONG);
         mService.showForegroundNotification(getCurrentSong());
     }
 
     private boolean checkSongs(@NonNull String forMethod) {
-        final boolean haveSongs = sSongs !=null && !sSongs.isEmpty();
+        final boolean haveSongs = mSongs !=null && !mSongs.isEmpty();
         if (!haveSongs) {
             Log.e(TAG, forMethod.concat(" called but playlist is empty"));
         }
@@ -166,7 +175,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         Context appContext = mService.getApplicationContext();
         Intent playerIntent = new Intent(appContext, PlayerService.class);
         playerIntent.setAction(action);
-        playerIntent.putExtra(PlayerService.SONG_KEY, sSongs.get(sCurrentIdx));
+        playerIntent.putExtra(PlayerService.SONG_KEY, mSongs.get(mCurrentIdx));
         mService.onStartCommand(playerIntent, 0, 0);
     }
 
@@ -183,8 +192,8 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         mService = binder.getService();
         mService.setPlaylistController(this);
         binder.registerListener(this);
-        if (mAutoPlay && !sSongs.isEmpty()) {
-            playAt(sCurrentIdx);
+        if (mAutoPlay && !mSongs.isEmpty()) {
+            playAt(mCurrentIdx);
         }
     }
 
@@ -192,4 +201,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     public void onServiceDisconnected(ComponentName name) {
         mService = null;
     }
+
+    // Enforce singleton pattern
+    private Player() { }
 }

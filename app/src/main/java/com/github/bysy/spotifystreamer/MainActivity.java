@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
         mIsMultiPane = findViewById(R.id.multipane_detail_container)!=null;
         // In multi-pane mode, the player is tied to our fragment manager
         if (mIsMultiPane) {
-            mPlayer = new Player();
+            mPlayer = Player.getInstance();
             mPlayer.initialize(this);
         }
     }
@@ -111,7 +111,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     static void updateNowPlaying(Menu menu) {
-        menu.findItem(R.id.action_now_playing).setEnabled(Player.hasPlaylist());
+        final Player player = Player.getInstance();
+        menu.findItem(R.id.action_now_playing).setEnabled(player.hasPlaylist());
     }
 
     static void handleNowPlaying(FragmentActivity activity, boolean showDialog) {

@@ -24,7 +24,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerDialog.Ge
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         // Initialize the player here so it can start the service
-        mPlayer = new Player();
+        mPlayer = Player.getInstance();
         mPlayer.initialize(this);
         if (savedInstanceState!=null) {
             return;
