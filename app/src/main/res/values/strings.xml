@@ -15,4 +15,9 @@
     <string name="title_activity_settings">Settings</string>
     <string name="action_now_playing_label">Now Playing</string>
     <string name="action_share_label">Share song</string>
+
+    // Accessessibility
+    <string name="action_previous_content_description">previous</string>
+    <string name="action_play_pause_content_description">toggle play</string>
+    <string name="action_next_content_description">next</string>
 </resources>
