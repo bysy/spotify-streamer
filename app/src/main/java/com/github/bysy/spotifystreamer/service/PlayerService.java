@@ -4,8 +4,11 @@
 
 package com.github.bysy.spotifystreamer.service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
@@ -19,6 +22,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
+import com.github.bysy.spotifystreamer.Player;
 import com.github.bysy.spotifystreamer.PlayerActivity;
 import com.github.bysy.spotifystreamer.R;
 import com.github.bysy.spotifystreamer.TopSongsFragment;
@@ -37,12 +41,15 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     private OnStateChange mListener = null;
     private ArrayList<SongInfo> mSongs;
     private MediaPlayer mMediaPlayer;
+    private Player mPlaylistController;
     private int mCurrentIndex = 0;
 
     public static final String ACTION_NEW_PLAYLIST = "ACTION_NEW_PLAYLIST";
     public static final String ACTION_CHANGE_SONG = "ACTION_CHANGE_SONG";
     public static final String ACTION_PAUSE = "ACTION_PAUSE";
     public static final String ACTION_RESUME = "ACTION_RESUME";
+    public static final String ACTION_PREVIOUS = "ACTION_PREVIOUS";
+    public static final String ACTION_NEXT = "ACTION_NEXT";
 
     public interface OnStateChange {
         void onStateChange(boolean isPlaying);
@@ -67,7 +74,16 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         return new LocalBinder();
     }
 
+    public void setPlaylistController(Player controller) {
+        mPlaylistController = controller;
+    }
+
     public void showForegroundNotification(SongInfo song) {
+        startForeground(NOTIFICATION_ID, createNotification(song, true));
+    }
+
+    private Notification createNotification(SongInfo song, boolean isPlaying) {
+        Log.d(TAG, "setting notification with isPlaying = " + isPlaying);
         Intent intent = new Intent(getApplicationContext(), PlayerActivity.class);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         final String artist = song.isCollaboration() ?
@@ -75,7 +91,13 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         builder.setSmallIcon(R.drawable.play_icon)
                 .setContentTitle("Playing ".concat(song.name))
                 .setContentText("by ".concat(artist))
-                .setOngoing(true);
+                .addAction(R.drawable.previous_icon, "Previous", newPendingIntent(ACTION_PREVIOUS));
+        if (isPlaying) {
+            builder.addAction(R.drawable.pause_icon, "Pause", newPendingIntent(ACTION_PAUSE));
+        } else {
+            builder.addAction(R.drawable.play_icon, "Play", newPendingIntent(ACTION_RESUME));
+        }
+        builder.addAction(R.drawable.next_icon, "Next", newPendingIntent(ACTION_NEXT));
         // Set lockscreen visibility
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final boolean showOnLockScreen =
@@ -90,7 +112,25 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         stack.addNextIntent(intent);
         PendingIntent pi = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         builder.setContentIntent(pi);
-        startForeground(NOTIFICATION_ID, builder.build());
+        return builder.build();
+    }
+
+    private void updateNotification(boolean isPlaying) {
+        if (mPlaylistController==null) return;
+        NotificationManager nm = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(NOTIFICATION_ID,
+                createNotification(mPlaylistController.getCurrentSong(), isPlaying));
+    }
+
+    private Intent newServiceIntent(String action) {
+        Intent intent = new Intent(this, PlayerService.class);
+        intent.setAction(action);
+        return intent;
+    }
+
+    private PendingIntent newPendingIntent(String action) {
+        return PendingIntent.getService(this, 0, newServiceIntent(action), 0);
     }
 
     @Override
@@ -136,6 +176,22 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                     mMediaPlayer.reset();
                 }
                 break;
+            case ACTION_PREVIOUS:
+                if (mPlaylistController==null) {
+                    success = false;
+                } else {
+                    mPlaylistController.previous();
+                    success = true;
+                }
+                break;
+            case ACTION_NEXT:
+                if (mPlaylistController==null) {
+                    success = false;
+                } else {
+                    mPlaylistController.next();
+                    success = true;
+                }
+                break;
             case ACTION_NULL:
                 Log.d(TAG, "Intent is null. Nothing to do.");
                 success = true;
@@ -143,6 +199,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             default:
                 success = false;
         }
+        final boolean isPlaying = isPlaying();
+        updateNotification(isPlaying);
+        if (mListener!=null) mListener.onStateChange(isPlaying);
         if (success) {
             Log.d(TAG, action.concat(": Success"));
         } else {
@@ -205,10 +264,12 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public void onPrepared(MediaPlayer mp) {
         mp.start();
         if (mListener!=null) mListener.onStateChange(true);
+        updateNotification(true);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         if (mListener!=null) mListener.onStateChange(false);
+        updateNotification(false);
     }
 }

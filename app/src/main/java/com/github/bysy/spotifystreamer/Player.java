@@ -182,6 +182,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     public void onServiceConnected(ComponentName name, IBinder service) {
         PlayerService.LocalBinder binder = (PlayerService.LocalBinder) service;
         mService = binder.getService();
+        mService.setPlaylistController(this);
         binder.registerListener(this);
         if (mAutoPlay && !sSongs.isEmpty()) {
             playAt(sCurrentIdx);
