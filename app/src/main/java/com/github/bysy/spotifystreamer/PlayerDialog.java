@@ -135,8 +135,7 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         }
     }
 
-    private void setViewData(SongInfo currentSong) {
-        if (currentSong==null) return;
+    private void setViewData(@NonNull SongInfo currentSong) {
         mArtistTextView.setText(currentSong.getArtistSummary());
         mAlbumTextView.setText(currentSong.albumName);
         mSongTextView.setText(currentSong.name);
@@ -166,7 +165,6 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
 
     @Override
     public void onPlayStateChange(boolean isPlaying) {
-        if (mPlayButton==null) return;
         setPlayButtonView(isPlaying);
     }
 }
