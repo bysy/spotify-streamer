@@ -38,7 +38,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     // Originally, I favored the ContentProvider approach because it would also
     // let us cache queries. But since we're not supposed to save the preview
     // audio files, we'd have to fire up the radio in any event.
-    private static boolean sNowPlaying = false;
+    private static boolean sHasPlaylist = false;
     private static ArrayList<SongInfo> sSongs = null;
     private static int sCurrentIdx = -1;
 
@@ -58,8 +58,8 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         mPlayListeners.remove(listener);
     }
 
-    static boolean nowPlaying() {
-        return sNowPlaying;
+    static boolean hasPlaylist() {
+        return sHasPlaylist;
     }
 
     /** Bind to the service. Call this before invoking play state methods (playAt() etc). */
@@ -76,7 +76,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
             Log.w(TAG, "Cannot play empty playlist");
             return;
         }
-        sNowPlaying = true;
+        sHasPlaylist = true;
         sSongs = songs;
         sCurrentIdx = 0;
     }

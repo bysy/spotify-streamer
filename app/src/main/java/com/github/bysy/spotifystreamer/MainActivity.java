@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     static void updateNowPlaying(Menu menu) {
-        menu.findItem(R.id.action_now_playing).setEnabled(Player.nowPlaying());
+        menu.findItem(R.id.action_now_playing).setEnabled(Player.hasPlaylist());
     }
 
     static void handleNowPlaying(FragmentActivity activity, boolean showDialog) {
