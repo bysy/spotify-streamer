@@ -20,11 +20,9 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-import com.github.bysy.spotifystreamer.MainActivity;
 import com.github.bysy.spotifystreamer.Player;
 import com.github.bysy.spotifystreamer.R;
 import com.github.bysy.spotifystreamer.data.SongInfo;
@@ -82,8 +80,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     public void showForegroundNotification(SongInfo song) {
-        startForeground(NOTIFICATION_ID, createNotification(song, true));
-        mIsForeground = true;
+        if (!mIsForeground) {
+            startForeground(NOTIFICATION_ID, createNotification(song, true));
+            mIsForeground = true;
+        }
     }
 
     private Notification createNotification(SongInfo song, boolean isPlaying) {
@@ -113,13 +113,6 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         views.setTextViewText(R.id.albumNameView, song.albumName);
         views.setTextViewText(R.id.artistNameView, song.primaryArtistName);
 
-        // Go back to main activity. We could figure out if want Main or Player,
-        // but I really need some sleep. It's not part of the rubric, so I can
-        // get some zzz. =) This way the user can click on Now Playing to go back
-        // to the full player.
-        Intent intent = new Intent(this.getBaseContext(), MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         final String artist = song.isCollaboration() ?
                 song.primaryArtistName.concat(" & others") : song.primaryArtistName;
@@ -144,10 +137,17 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         } else {
             builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
         }
-        TaskStackBuilder stack = TaskStackBuilder.create(this);
-        stack.addNextIntent(intent);
-        PendingIntent pi = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        builder.setContentIntent(pi);
+        // Don't assign an intent for the whole notification for now.
+        // It's not part of the optional rubric item, so I can get some zzz. =)
+        // TODO: Figure out how to go back to original activity
+        // FLAG_ACTIVITY_CLEAR_TOP doesn't do the trick. Nor the combo with new task.
+
+        //Intent intent = new Intent(this.getBaseContext(), MainActivity.class);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //TaskStackBuilder stack = TaskStackBuilder.create(this);
+        //stack.addNextIntent(intent);
+        //PendingIntent pi = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        //builder.setContentIntent(pi);
 
         Notification notification = builder.build();
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN) {
@@ -236,6 +236,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 break;
             case ACTION_STOP:
                 success = true;
+                if (mMediaPlayer!=null) mMediaPlayer.reset();
                 mIsForeground = false;
                 stopForeground(true);
                 break;

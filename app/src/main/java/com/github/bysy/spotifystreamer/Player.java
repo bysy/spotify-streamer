@@ -113,6 +113,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     void play() {
         if (!checkSongs("play")) return;
         sendPlayerCommand(PlayerService.ACTION_RESUME);
+        mService.showForegroundNotification(getCurrentSong());
     }
 
     /**
