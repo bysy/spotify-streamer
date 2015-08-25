@@ -52,6 +52,11 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public static final String ACTION_NEXT = "ACTION_NEXT";
     public static final String ACTION_STOP = "ACTION_STOP";
     private AudioManager mAudioManager;
+    private PendingIntent mPrevIntent;
+    private PendingIntent mPauseIntent;
+    private PendingIntent mPlayIntent;
+    private PendingIntent mNextIntent;
+    private PendingIntent mStopIntent;
 
     @Override
     public void onAudioFocusChange(int focusChange) {
@@ -100,20 +105,15 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         // Thank you http://stackoverflow.com/a/16168704
         RemoteViews views = new RemoteViews(
                 getPackageName(), R.layout.player_notification);
-        // TODO: Some stuff below can be put in fields to reduce overhead
+        // TODO: Some more stuff below can be put in fields to reduce overhead
         // TODO: Extract expanded layout building so we can skip it completely on older SDKs
-        final PendingIntent prevIntent = newPendingIntent(ACTION_PREVIOUS);
-        final PendingIntent pauseIntent = newPendingIntent(ACTION_PAUSE);
-        final PendingIntent playIntent = newPendingIntent(ACTION_RESUME);
-        final PendingIntent nextIntent = newPendingIntent(ACTION_NEXT);
-        final PendingIntent stopIntent = newPendingIntent(ACTION_STOP);
 
-        final PendingIntent playPauseIntent = isPlaying ? pauseIntent : playIntent;
+        final PendingIntent playPauseIntent = isPlaying ? mPauseIntent : mPlayIntent;
 
-        views.setOnClickPendingIntent(R.id.previousButton, prevIntent);
+        views.setOnClickPendingIntent(R.id.previousButton, mPrevIntent);
         views.setOnClickPendingIntent(R.id.playPauseButton, playPauseIntent);
-        views.setOnClickPendingIntent(R.id.nextButton, nextIntent);
-        views.setOnClickPendingIntent(R.id.stopButton, stopIntent);
+        views.setOnClickPendingIntent(R.id.nextButton, mNextIntent);
+        views.setOnClickPendingIntent(R.id.stopButton, mStopIntent);
 
         final String artist = song.getArtistSummary();
 
@@ -127,15 +127,15 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         builder.setSmallIcon(R.drawable.play_icon)
                 .setContentTitle("Playing ".concat(song.name))
                 .setContentText("by ".concat(artist))
-                .addAction(R.drawable.previous_icon, "Previous", prevIntent);
+                .addAction(R.drawable.previous_icon, "Previous", mPrevIntent);
         if (isPlaying) {
-            builder.addAction(R.drawable.pause_icon, "Pause", pauseIntent);
+            builder.addAction(R.drawable.pause_icon, "Pause", mPauseIntent);
         } else {
-            builder.addAction(R.drawable.play_icon, "Play", playIntent);
+            builder.addAction(R.drawable.play_icon, "Play", mPlayIntent);
         }
 
-        builder.addAction(R.drawable.next_icon, "Next", nextIntent);
-        builder.addAction(R.drawable.pause_icon, "Stop", stopIntent);
+        builder.addAction(R.drawable.next_icon, "Next", mNextIntent);
+        builder.addAction(R.drawable.pause_icon, "Stop", mStopIntent);
         // Set lockscreen visibility
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final boolean showOnLockScreen =
@@ -189,6 +189,11 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     @Override
     public void onCreate() {
         super.onCreate();
+        mPrevIntent = newPendingIntent(ACTION_PREVIOUS);
+        mPauseIntent = newPendingIntent(ACTION_PAUSE);
+        mPlayIntent = newPendingIntent(ACTION_RESUME);
+        mNextIntent = newPendingIntent(ACTION_NEXT);
+        mStopIntent = newPendingIntent(ACTION_STOP);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
     }
 
