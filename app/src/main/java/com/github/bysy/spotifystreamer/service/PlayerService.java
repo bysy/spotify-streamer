@@ -36,7 +36,7 @@ import java.io.IOException;
 public class PlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener {
     private static final String ACTION_NULL = "ACTION_NULL";
     private static final int NOTIFICATION_ID = 234500001;
-    private static String TAG = PlayerService.class.getSimpleName();
+    private static final String TAG = PlayerService.class.getSimpleName();
     private OnStateChange mListener = null;
     private SongInfo mSong;
     private MediaPlayer mMediaPlayer;
