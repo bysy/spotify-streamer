@@ -58,6 +58,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     private PendingIntent mNextIntent;
     private PendingIntent mStopIntent;
 
+
     @Override
     public void onAudioFocusChange(int focusChange) {
         if (focusChange!=AudioManager.AUDIOFOCUS_GAIN) {
@@ -108,9 +109,12 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.drawable.play_icon)
-                .setContentTitle("Playing ".concat(song.name))
+                .setContentTitle(song.name)
                 .setContentText("by ".concat(artist))
-                //.setStyle(new NotificationCompat.MediaStyle())
+                .setStyle(new NotificationCompat.MediaStyle()
+                        .setCancelButtonIntent(mStopIntent)
+                        .setShowActionsInCompactView(1)  // only play pause
+                        .setShowCancelButton(true))      // and cancel
                 .addAction(R.drawable.previous_icon, "Previous", mPrevIntent);
         if (isPlaying) {
             builder.addAction(R.drawable.pause_icon, "Pause", mPauseIntent);
@@ -165,9 +169,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     private void updateNotification(boolean isPlaying) {
         if (!mIsForeground || mPlaylistController==null) return;
-        //NotificationManager nm = (NotificationManager)
-        //        getSystemService(Context.NOTIFICATION_SERVICE);
-        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID,
+        NotificationManagerCompat.from(this).notify(
+                NOTIFICATION_ID,
                 createNotification(mPlaylistController.getCurrentSong(), isPlaying));
     }
 
@@ -190,6 +193,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mNextIntent = newPendingIntent(ACTION_NEXT);
         mStopIntent = newPendingIntent(ACTION_STOP);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+        requestAudioFocus();
     }
 
     @Override
