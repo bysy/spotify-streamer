@@ -5,7 +5,6 @@
 package com.github.bysy.spotifystreamer.service;
 
 import android.app.Notification;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
@@ -19,7 +18,8 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
@@ -110,6 +110,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         builder.setSmallIcon(R.drawable.play_icon)
                 .setContentTitle("Playing ".concat(song.name))
                 .setContentText("by ".concat(artist))
+                //.setStyle(new NotificationCompat.MediaStyle())
                 .addAction(R.drawable.previous_icon, "Previous", mPrevIntent);
         if (isPlaying) {
             builder.addAction(R.drawable.pause_icon, "Pause", mPauseIntent);
@@ -164,9 +165,9 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     private void updateNotification(boolean isPlaying) {
         if (!mIsForeground || mPlaylistController==null) return;
-        NotificationManager nm = (NotificationManager)
-                getSystemService(Context.NOTIFICATION_SERVICE);
-        nm.notify(NOTIFICATION_ID,
+        //NotificationManager nm = (NotificationManager)
+        //        getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID,
                 createNotification(mPlaylistController.getCurrentSong(), isPlaying));
     }
 
