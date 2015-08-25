@@ -118,7 +118,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         }
 
         builder.addAction(R.drawable.next_icon, "Next", mNextIntent);
-        builder.addAction(R.drawable.pause_icon, "Stop", mStopIntent);
+        builder.addAction(R.drawable.close_icon, "Stop", mStopIntent);
         // Set lockscreen visibility
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         final boolean showOnLockScreen =
