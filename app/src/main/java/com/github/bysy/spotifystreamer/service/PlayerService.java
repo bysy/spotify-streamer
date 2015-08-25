@@ -101,27 +101,10 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     private Notification createNotification(SongInfo song, boolean isPlaying) {
         Log.d(TAG, "setting notification with isPlaying = " + isPlaying);
-        // Display custom layout
-        // Thank you http://stackoverflow.com/a/16168704
-        RemoteViews views = new RemoteViews(
-                getPackageName(), R.layout.player_notification);
-        // TODO: Some more stuff below can be put in fields to reduce overhead
-        // TODO: Extract expanded layout building so we can skip it completely on older SDKs
 
         final PendingIntent playPauseIntent = isPlaying ? mPauseIntent : mPlayIntent;
-
-        views.setOnClickPendingIntent(R.id.previousButton, mPrevIntent);
-        views.setOnClickPendingIntent(R.id.playPauseButton, playPauseIntent);
-        views.setOnClickPendingIntent(R.id.nextButton, mNextIntent);
-        views.setOnClickPendingIntent(R.id.stopButton, mStopIntent);
-
-        final String artist = song.getArtistSummary();
-
         final int playPauseRes = isPlaying ? R.drawable.pause_icon : R.drawable.play_icon;
-        views.setImageViewResource(R.id.playPauseButton, playPauseRes);
-        views.setTextViewText(R.id.songNameView, song.name);
-        views.setTextViewText(R.id.albumNameView, song.albumName);
-        views.setTextViewText(R.id.artistNameView, artist);
+        final String artist = song.getArtistSummary();
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setSmallIcon(R.drawable.play_icon)
@@ -159,6 +142,17 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
         Notification notification = builder.build();
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN) {
+            // Display custom layout
+            // Thank you http://stackoverflow.com/a/16168704
+            RemoteViews views = new RemoteViews(getPackageName(), R.layout.player_notification);
+            views.setOnClickPendingIntent(R.id.previousButton, mPrevIntent);
+            views.setOnClickPendingIntent(R.id.playPauseButton, playPauseIntent);
+            views.setOnClickPendingIntent(R.id.nextButton, mNextIntent);
+            views.setOnClickPendingIntent(R.id.stopButton, mStopIntent);
+            views.setImageViewResource(R.id.playPauseButton, playPauseRes);
+            views.setTextViewText(R.id.songNameView, song.name);
+            views.setTextViewText(R.id.albumNameView, song.albumName);
+            views.setTextViewText(R.id.artistNameView, artist);
             notification.bigContentView = views;
             Picasso.with(this).load(song.albumImageUrl)
                     .centerCrop()
