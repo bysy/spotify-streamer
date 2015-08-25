@@ -53,6 +53,9 @@
         <service android:name=".service.PlayerService"
             android:exported="false"
             android:enabled="true" />
+        <receiver android:name=".service.PlayerService$MediaButtonReceiver"
+            android:exported="false" android:enabled="true">
+        </receiver>
     </application>
 
 </manifest>

@@ -7,6 +7,8 @@ package com.github.bysy.spotifystreamer.service;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +21,8 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -58,6 +62,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     private PendingIntent mNextIntent;
     private PendingIntent mStopIntent;
 
+    private MediaSessionCompat mMediaSession;
+    private MediaSessionCompat.Token mToken;
 
     @Override
     public void onAudioFocusChange(int focusChange) {
@@ -112,6 +118,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 .setContentTitle(song.name)
                 .setContentText("by ".concat(artist))
                 .setStyle(new NotificationCompat.MediaStyle()
+                        .setMediaSession(mToken)
                         .setCancelButtonIntent(mStopIntent)
                         .setShowActionsInCompactView(1)  // only play pause
                         .setShowCancelButton(true))      // and cancel
@@ -194,7 +201,22 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mStopIntent = newPendingIntent(ACTION_STOP);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 
+        Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+        PendingIntent pi = PendingIntent.getBroadcast(this, 0, intent, 0);
+        ComponentName receiver = new ComponentName(getPackageName(),
+                MediaButtonReceiver.class.getName());
+        mMediaSession = new MediaSessionCompat(this, "PlayerService", receiver, null);
+        mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mMediaSession.setCallback(new MediaSessionCallback());
+        mMediaSession.setPlaybackState(new PlaybackStateCompat.Builder()
+                .setState(PlaybackStateCompat.STATE_PAUSED, 0, 0.0f)
+                .setActions(PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT).build());
         requestAudioFocus();
+        mToken = mMediaSession.getSessionToken();
+        mMediaSession.setActive(true);
     }
 
     @Override
@@ -341,6 +363,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         mMediaPlayer.release();
         mMediaPlayer = null;
         abandonAudioFocus();
+        mMediaSession.release();
     }
 
     @Override
@@ -354,5 +377,44 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     public void onCompletion(MediaPlayer mp) {
         if (mListener!=null) mListener.onStateChange();
         updateNotification(false);
+    }
+
+    // MediaSessionCompat stubs
+
+    private class MediaSessionCallback extends MediaSessionCompat.Callback {
+        private final String TAG = MediaSessionCallback.class.getSimpleName();
+
+        public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+            Log.d(TAG, "received media button event " + mediaButtonEvent);
+            return super.onMediaButtonEvent(mediaButtonEvent);
+        }
+
+        @Override
+        public void onPlay() {
+            super.onPlay();
+        }
+
+        @Override
+        public void onSkipToNext() {
+            super.onSkipToNext();
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            super.onSkipToPrevious();
+        }
+
+        @Override
+        public void onStop() {
+            super.onStop();
+        }
+    }
+
+    public static class MediaButtonReceiver extends BroadcastReceiver {
+        private static final String TAG = MediaButtonReceiver.class.getSimpleName();
+
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "received media button event " + intent);
+        }
     }
 }
