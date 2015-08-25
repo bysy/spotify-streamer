@@ -202,8 +202,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 success = requestAudioFocus() && handleNewSong(intent);
                 break;
             case ACTION_PAUSE:
-                success = true;
-                if (mMediaPlayer==null) success = initializeIfNecessary(intent);
+                success = mMediaPlayer!=null || initializeIfNecessary(intent);
                 if (!success) break;
                 try {
                     if (mMediaPlayer.isPlaying()) {
@@ -215,11 +214,11 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 }
                 break;
             case ACTION_RESUME:
-                final boolean haveFocus = requestAudioFocus();
-                success = true;
-                if (mMediaPlayer==null) {
-                    success = haveFocus && initializeIfNecessary(intent);
+                if (!requestAudioFocus()) {
+                    success = false;
+                    break;
                 }
+                success = mMediaPlayer!=null || initializeIfNecessary(intent);
                 if (!success) break;
                 try {
                     if (!mMediaPlayer.isPlaying()) {
@@ -250,11 +249,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
                 }
                 break;
             case ACTION_STOP:
-                success = true;
-                if (mMediaPlayer!=null) mMediaPlayer.reset();
-                abandonAudioFocus();
-                mIsForeground = false;
-                stopForeground(true);
+                success = handleStop();
                 break;
             case ACTION_NULL:
                 Log.d(TAG, "Intent is null. Nothing to do.");
@@ -272,6 +267,14 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
             Log.d(TAG, action.concat(": Failed"));
         }
         return mode;
+    }
+
+    private boolean handleStop() {
+        if (mMediaPlayer!=null) mMediaPlayer.reset();
+        abandonAudioFocus();
+        mIsForeground = false;
+        stopForeground(true);
+        return true;
     }
 
     private boolean requestAudioFocus() {
