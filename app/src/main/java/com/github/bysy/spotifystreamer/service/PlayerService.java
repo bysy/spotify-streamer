@@ -199,7 +199,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         final String action = intent==null ? ACTION_NULL : intent.getAction();
         switch (action) {
             case ACTION_NEW_SONG:
-                success = requestAudioFocus() && handleNewPlaylist(intent);
+                success = requestAudioFocus() && handleNewSong(intent);
                 break;
             case ACTION_PAUSE:
                 success = true;
@@ -301,8 +301,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         return true;
     }
 
-    /** Start playing a new list of songs. Returns whether media player was correctly set up. */
-    private boolean handleNewPlaylist(Intent intent) {
+    /** Start playing a new song. Returns whether media player was correctly set up. */
+    private boolean handleNewSong(Intent intent) {
         mSong = intent.getParcelableExtra(SONG_KEY);
         return initializeIfNecessary(intent) && prepareAndStart();
     }
