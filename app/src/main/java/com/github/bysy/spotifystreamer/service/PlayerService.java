@@ -9,14 +9,12 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
@@ -94,10 +92,15 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
     }
 
     public void showForegroundNotification(SongInfo song) {
+        if (!shouldShowNotification()) return;
         if (!mIsForeground) {
             startForeground(NOTIFICATION_ID, createNotification(song, true));
             mIsForeground = true;
         }
+    }
+
+    private boolean shouldShowNotification() {
+        return mPlaylistController!=null && mPlaylistController.shouldShowNotification();
     }
 
     private Notification createNotification(SongInfo song, boolean isPlaying) {
@@ -125,14 +128,8 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         builder.addAction(R.drawable.next_icon, "Next", mNextIntent);
         builder.addAction(R.drawable.close_icon, "Stop", mStopIntent);
         // Set lockscreen visibility
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final boolean showOnLockScreen =
-                prefs.getBoolean(getString(R.string.pref_notification_key), false);
-        if (showOnLockScreen) {
-            builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-        } else {
-            builder.setVisibility(NotificationCompat.VISIBILITY_SECRET);
-        }
+        builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
         // Don't assign an intent for the whole notification for now.
         // It's not part of the optional rubric item, so I can get some zzz. =)
         // TODO: Figure out how to go back to original activity
@@ -169,6 +166,7 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
 
     private void updateNotification(boolean isPlaying) {
         if (!mIsForeground || mPlaylistController==null) return;
+        if (!shouldShowNotification()) return;
         NotificationManagerCompat.from(this).notify(
                 NOTIFICATION_ID,
                 createNotification(mPlaylistController.getCurrentSong(), isPlaying));

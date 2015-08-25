@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+        PreferenceManager.setDefaultValues(getApplicationContext(), R.xml.pref_general, false);
         setContentView(R.layout.activity_main);
         mIsMultiPane = findViewById(R.id.multipane_detail_container)!=null;
         // In multi-pane mode, the player is tied to us

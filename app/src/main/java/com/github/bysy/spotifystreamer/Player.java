@@ -8,7 +8,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -48,6 +50,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     private PlayerService mService;
     private boolean mAutoPlay = false;
     private Set<OnStateChange> mPlayListeners = new HashSet<>(2);
+    private boolean mShowNotification;  // Updated from preference in initialize()
 
     public interface OnStateChange {
         void onPlayStateChange(boolean isPlaying);
@@ -82,7 +85,9 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
 
     /** Bind to the service. Call this before invoking play state methods (playAt() etc). */
     void initialize(Context context) {
-        Context appContext = context.getApplicationContext();
+        final Context appContext = context.getApplicationContext();
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(appContext);
+        mShowNotification = prefs.getBoolean(context.getString(R.string.pref_notification_key), false);
         if (mService==null) {
             Intent bindIntent = new Intent(appContext, PlayerService.class);
             appContext.bindService(bindIntent, this, Context.BIND_AUTO_CREATE);
@@ -204,6 +209,10 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
             }
         }
         mLastSong = song;
+    }
+
+    public boolean shouldShowNotification() {
+        return mShowNotification;
     }
 
     @Override
