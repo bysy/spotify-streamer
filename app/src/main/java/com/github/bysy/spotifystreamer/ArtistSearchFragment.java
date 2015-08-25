@@ -134,7 +134,7 @@ public class ArtistSearchFragment extends Fragment {
         // Restore state
         if (savedInstanceState!=null) {
             String searchStr = savedInstanceState.getString(Key.SEARCH_TEXT);
-            if (searchStr!=null) {
+            if (searchStr!=null && !searchStr.equals(mLastSearch)) {
                 Log.d(TAG, "restoring from saved state");
                 mSearchText.setText(searchStr);
                 boolean doSearch = savedInstanceState.getBoolean(Key.SHOULD_SEARCH);
