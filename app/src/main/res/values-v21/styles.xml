@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Notification styles for Lollipop+ -->
+    <style name="notificationTitle"
+        parent="@android:style/TextAppearance.Material.Notification.Title"/>
+    <style name="notificationText"
+        parent="@android:style/TextAppearance.Material.Notification.Line2"/>
+</resources>

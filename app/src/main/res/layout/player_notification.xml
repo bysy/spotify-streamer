@@ -28,7 +28,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                style="@style/notificationTitle"
                 tools:text="Song"
                 android:id="@+id/songNameView"
                 android:layout_alignParentTop="true"
@@ -38,7 +38,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                style="@style/notificationText"
                 tools:text="Album"
                 android:id="@+id/albumNameView"
                 android:layout_below="@+id/songNameView"
@@ -48,7 +48,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                style="@style/notificationText"
                 tools:text="Artist"
                 android:id="@+id/artistNameView"
                 android:layout_below="@+id/albumNameView"

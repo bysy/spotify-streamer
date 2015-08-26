@@ -16,4 +16,10 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
+
+    <!-- Custom notifications need to have styles set for text to appear correctly on different APIs.
+         http://stackoverflow.com/a/4935191 -->
+    <style name="notificationTitle" parent="@android:style/TextAppearance.StatusBar.EventContent.Title"/>
+    <style name="notificationText" parent="@android:style/TextAppearance.StatusBar.EventContent" />
+
 </resources>
