@@ -7,31 +7,72 @@ package com.github.bysy.spotifystreamer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.github.bysy.spotifystreamer.data.SongInfo;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Display the player controls. Containing Activity needs to implement interface HasPlayer.
  */
-public class PlayerDialog extends DialogFragment implements Player.OnStateChange {
+public class PlayerDialog extends DialogFragment implements Player.OnStateChange, SeekBar.OnSeekBarChangeListener {
     private static final String TAG = PlayerDialog.class.getSimpleName();
     private ImageView mAlbumImageView;
     private TextView mArtistTextView;
     private TextView mAlbumTextView;
     private TextView mSongTextView;
     private ImageButton mPlayButton;
+    private TextView mSongPositionView;
+    private TextView mSongLengthView;
     private Player mPlayer;  // handles player state
+    private SeekBar mSeekbar;
+    private Handler mHandler;
+    private boolean mRunTicks = false;
+    private Runnable mTickUpdater = new Runnable() {
+        @Override
+        public void run() {
+            long position = mPlayer.getPosition();
+            updateTimeView(mSongPositionView, position);
+            mSeekbar.setProgress((int) position);
+            if (mRunTicks) {
+                mHandler.postDelayed(mTickUpdater, 100);
+            }
+        }
+    };
 
     public PlayerDialog() {
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (!fromUser) {
+            return;
+        }
+        mPlayer.seekTo(progress);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        stopTickUpdates();
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        startTickUpdates();
     }
 
     public interface HasPlayer {
@@ -43,7 +84,7 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
+        mHandler = new Handler();
     }
 
     @Override
@@ -55,6 +96,8 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         mArtistTextView = (TextView) view.findViewById(R.id.artistNameView);
         mAlbumTextView = (TextView) view.findViewById(R.id.albumNameView);
         mSongTextView = (TextView) view.findViewById(R.id.songNameView);
+        mSongPositionView = (TextView) view.findViewById(R.id.songPositionTextView);
+        mSongLengthView = (TextView) view.findViewById(R.id.songLengthTextView);
 
         View buttonBar = view.findViewById(R.id.buttons);
         ImageButton prevButton = (ImageButton) buttonBar.findViewById(R.id.previousButton);
@@ -64,6 +107,8 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         prevButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                stopTickUpdates();
+                resetTimeViews();
                 mPlayer.previous();
             }
         });
@@ -76,10 +121,29 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                stopTickUpdates();
+                resetTimeViews();
                 mPlayer.next();
             }
         });
+
+        mSeekbar = (SeekBar) view.findViewById(R.id.seekBar);
+        // Apply accent color on older APIs
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            int appAccentColor = ContextCompat.getColor(getContext(), R.color.accent);
+            mSeekbar.getProgressDrawable().setColorFilter(appAccentColor, PorterDuff.Mode.SRC_IN);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                mSeekbar.getThumb().setColorFilter(appAccentColor, PorterDuff.Mode.SRC_IN);
+            }
+        }
+        mSeekbar.setOnSeekBarChangeListener(this);
         return view;
+    }
+
+    private void resetTimeViews() {
+        mSeekbar.setProgress(0);
+        updateTimeView(mSongPositionView, 0);
+        updateTimeView(mSongLengthView, 0);
     }
 
     static Intent getShareIntent(Context context, SongInfo song) {
@@ -97,12 +161,15 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
     @Override
     public void onPause() {
         mPlayer.unregisterPlayChangeListener(this);
+        mRunTicks = false;
         super.onPause();
     }
 
     @Override
     public void onResume() {
         mPlayer.registerPlayChangeListener(this);
+        mRunTicks = true;
+        updateTimeView(mSongLengthView, mPlayer.getDuration());
         super.onResume();
     }
 
@@ -139,6 +206,7 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
     @Override
     public void onSongChange(@NonNull SongInfo song) {
         setViewData(song);
+        resetTimeViews();
         final Activity parent = getActivity();
         ((HasPlayer) parent).onNewShareIntent(getShareIntent(parent, song));
     }
@@ -146,5 +214,29 @@ public class PlayerDialog extends DialogFragment implements Player.OnStateChange
     @Override
     public void onPlayStateChange(boolean isPlaying) {
         setPlayButtonView(isPlaying);
+        if (isPlaying) {
+            int duration = (int) mPlayer.getDuration();
+            mSeekbar.setMax(duration);
+            updateTimeView(mSongLengthView, duration);
+            startTickUpdates();
+        } else {
+            stopTickUpdates();
+        }
+    }
+
+    private void stopTickUpdates() {
+        mRunTicks = false;
+    }
+
+    private void startTickUpdates() {
+        mRunTicks = true;
+        mTickUpdater.run();
+    }
+
+    static private void updateTimeView(TextView timeView, long milliseconds) {
+        final long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
+        final long secondsAll = TimeUnit.MILLISECONDS.toSeconds(milliseconds);
+        final long seconds = secondsAll - TimeUnit.MINUTES.toSeconds(minutes);
+        timeView.setText(String.format("%d:%02d", minutes, seconds));
     }
 }

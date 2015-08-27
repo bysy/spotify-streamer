@@ -72,6 +72,18 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         return mMediaPlayer!=null && mMediaPlayer.isPlaying();
     }
 
+    public long getPosition() {
+        return mMediaPlayer!=null ? mMediaPlayer.getCurrentPosition() : -1;
+    }
+    public long getDuration() {
+        return mMediaPlayer!=null ? mMediaPlayer.getDuration() : 0;
+    }
+
+    public void seekTo(int milliseconds) {
+        if (mMediaPlayer==null) return;
+        mMediaPlayer.seekTo(milliseconds);
+    }
+
     public class LocalBinder extends Binder {
         public PlayerService getService() {
             return PlayerService.this;

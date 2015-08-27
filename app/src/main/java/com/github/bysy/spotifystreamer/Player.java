@@ -51,6 +51,7 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     private boolean mAutoPlay = false;
     private Set<OnStateChange> mPlayListeners = new HashSet<>(2);
     private boolean mShowNotification;  // Updated from preference in initialize()
+    private int mDuration = 0;
 
     public interface OnStateChange {
         void onPlayStateChange(boolean isPlaying);
@@ -121,6 +122,14 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         return mSongs.get(mCurrentIdx);
     }
 
+    public int getPosition() {
+        return mService!=null ? (int) mService.getPosition() : -1;
+    }
+
+    public int getDuration() {
+        return mDuration;
+    }
+
     public boolean isPlaying() {
         return mService!=null && mService.isPlaying();
     }
@@ -176,6 +185,14 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         mService.showForegroundNotification(getCurrentSong());
     }
 
+    public void seekTo(int milliseconds) {
+        if (mService==null) return;
+        mService.seekTo(milliseconds);
+        if (!isPlaying()) {
+            play();
+        }
+    }
+
     private boolean checkSongs(@NonNull String forMethod) {
         final boolean haveSongs = mSongs !=null && !mSongs.isEmpty();
         if (!haveSongs) {
@@ -201,6 +218,9 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
     }
 
     private void updateListener(OnStateChange listener, boolean doFullUpdate) {
+        if (isPlaying()) {
+            mDuration = (int) mService.getDuration();
+        }
         listener.onPlayStateChange(isPlaying());
         final SongInfo song = getCurrentSong();
         if (song!=null) {
