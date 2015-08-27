@@ -41,7 +41,31 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         if (actionBarView!=null && actionBarView instanceof Toolbar) {
             setSupportActionBar((Toolbar) actionBarView);
         }
+        Preference localeList = findPreference(getString(R.string.pref_locale_list_preference_key));
+        localeList.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                final String stringValue = newValue.toString();
+                updateCustomEnabled(stringValue);
+                return sUpdateSummaryListener.onPreferenceChange(preference, newValue);
+            }
+        });
+        updateSummary(localeList);
+        String customValue = PreferenceManager.getDefaultSharedPreferences(this).getString(
+                localeList.getKey(),
+                getString(R.string.pref_locale_default_value));
+        updateCustomEnabled(customValue);
         bindGenericSummaryToValue(findPreference(getString(R.string.pref_locale_key)));
+    }
+
+    @SuppressWarnings("deprecation")
+    private void updateCustomEnabled(String stringValue) {
+        final Preference customLocale = findPreference(getString(R.string.pref_locale_key));
+        if (stringValue.equals(getString(R.string.pref_locale_custom_value))) {
+            customLocale.setEnabled(true);
+        } else {
+            customLocale.setEnabled(false);
+        }
     }
 
     // Rest of file based on trimmed-down AndroidStudio-generated settings activity.
@@ -91,6 +115,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
         // Trigger the listener immediately with the preference's
         // current value.
+        updateSummary(preference);
+    }
+
+    private static void updateSummary(Preference preference) {
         sUpdateSummaryListener.onPreferenceChange(preference,
                 PreferenceManager
                         .getDefaultSharedPreferences(preference.getContext())

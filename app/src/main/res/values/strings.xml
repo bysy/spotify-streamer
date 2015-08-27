@@ -10,8 +10,15 @@
     <string name="searchHint">Search artist</string>
     <string name="title_activity_player">PlayerActivity</string>
 
+    <string name="default_locale">System default</string>
+    <string name="custom_locale">Custom locale</string>
+
     <string name="pref_notification_key">notification</string>
     <string name="pref_locale_key">locale</string>
+    <string name="pref_locale_default_value">default</string>
+    <string name="pref_locale_custom_value">custom</string>
+    <string name="pref_locale_list_preference_key">pref_locale_list_key</string>
+    <string name="pref_us_locale">US</string>
     <string name="title_activity_settings">Settings</string>
     <string name="action_now_playing_label">Now Playing</string>
     <string name="action_share_label">Share song</string>

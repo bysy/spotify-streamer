@@ -7,6 +7,7 @@ package com.github.bysy.spotifystreamer;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -154,21 +155,28 @@ public class TopSongsFragment extends Fragment {
     }
 
     /**
-     * Return preferred country code. Specifically, returns the first non-empty value
-     * of Custom CC > Default CC > "US"
+     * Return preferred country code.
      */
     private String getPreferredCountryCode() {
         final Context context = getActivity();
-        final String locale_key = context.getString(R.string.pref_locale_key);
-        final String custom_locale = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(locale_key, "");
-        if (!custom_locale.isEmpty()) {
-            return custom_locale;
-        } else {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        final String localeKey = context.getString(R.string.pref_locale_list_preference_key);
+        final String localePref = prefs.getString(localeKey,
+                getString(R.string.pref_locale_default_value));
+        if (localePref.equals(getString(R.string.pref_locale_default_value))) {
             return Util.getCountryCode();
+        } else if (localePref.equals(getString(R.string.pref_us_locale))) {
+            return getString(R.string.pref_us_locale);
+        } else {
+            final String customLocaleKey = context.getString(R.string.pref_locale_key);
+            final String customLocale = prefs.getString(customLocaleKey, "");
+            if (!customLocale.isEmpty()) {
+                return customLocale;
+            } else {
+                return Util.getCountryCode();
+            }
         }
     }
-
 
     class SongsAdapter extends ArrayAdapter<SongInfo> {
         private final int mResource;

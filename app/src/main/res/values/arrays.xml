@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_locale_entries_array">
+        <item>@string/default_locale</item>
+        <item>@string/pref_us_locale</item>
+        <item>@string/custom_locale</item>
+    </string-array>
+    <string-array name="pref_locale_values_array">
+        <item>@string/pref_locale_default_value</item>
+        <item>@string/pref_us_locale</item>
+        <item>@string/pref_locale_custom_value</item>
+    </string-array>
+</resources>
