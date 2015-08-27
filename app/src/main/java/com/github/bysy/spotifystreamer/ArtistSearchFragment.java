@@ -131,7 +131,8 @@ public class ArtistSearchFragment extends Fragment {
                 return true;
             }
         });
-        // Restore state
+        // Restore state. Because we're running on a retained instance, this runs only when
+        // the app is restored after being evicted from memory, not on rotation changes.
         if (savedInstanceState!=null) {
             String searchStr = savedInstanceState.getString(Key.SEARCH_TEXT);
             if (searchStr!=null && !searchStr.equals(mLastSearch)) {
