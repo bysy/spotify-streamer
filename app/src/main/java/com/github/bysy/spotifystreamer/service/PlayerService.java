@@ -64,6 +64,11 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         }
     }
 
+    public void cancelNotification() {
+        mIsForeground = false;
+        stopForeground(true);
+    }
+
     public interface OnStateChange {
         void onStateChange();
     }

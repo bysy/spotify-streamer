@@ -73,6 +73,15 @@ public class Player implements ServiceConnection, PlayerService.OnStateChange {
         mPlayListeners.remove(listener);
     }
 
+    public void onShowNotificationPreferenceChange(boolean showNotifications) {
+        if (mService==null) return;
+        if (!showNotifications) {
+            mService.cancelNotification();
+        } else {
+            mService.showForegroundNotification(getCurrentSong());
+        }
+    }
+
     public static Player getInstance() {
         if (sInstance==null) {
             sInstance = new Player();

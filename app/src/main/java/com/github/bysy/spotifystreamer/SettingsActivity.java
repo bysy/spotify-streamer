@@ -56,6 +56,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 getString(R.string.pref_locale_default_value));
         updateCustomEnabled(customValue);
         bindGenericSummaryToValue(findPreference(getString(R.string.pref_locale_key)));
+        Preference notification = findPreference(getString(R.string.pref_notification_key));
+        notification.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                final String stringValue = newValue.toString();
+                final boolean tf = stringValue.equals("true");
+                Player.getInstance().onShowNotificationPreferenceChange(tf);
+                return true;
+            }
+        });
     }
 
     @SuppressWarnings("deprecation")
