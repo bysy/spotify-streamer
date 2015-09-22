@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.github.bysy.spotifystreamer.data.ArtistInfo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,18 +46,18 @@ import retrofit.client.Response;
  * artist is selected.
  */
 public class ArtistSearchFragment extends Fragment {
+    private ArtistSearchStateFragment mRetainedState;
+
     private static class Key {
-        private static final String SHOULD_SEARCH = "SHOULD_SEARCH";
+        private static final String SHOULD_SEARCH = "SHOULD_SEARCH";  // whether user searched for the current input
         private static final String SEARCH_TEXT = "SEARCH_TEXT";
     }
     private static final String TAG = ArtistSearchFragment.class.getSimpleName();
 
     private ListView mArtistsListView;
     private EditText mSearchText;
-    private List<ArtistInfo> mArtists = new ArrayList<>();
     private ArtistAdapter mAdapter;
     private final SpotifyApi mSpotApi = new SpotifyApi();
-    private String mLastSearch;
     private int mLastTotal;
 
     interface OnArtistSelected {
@@ -69,8 +70,6 @@ public class ArtistSearchFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);  // TODO: Move expensive state (artist list, SpotifyApi) to non-UI fragment as per recommendation.
-        mAdapter = new ArtistAdapter(getActivity(), R.layout.single_artist, mArtists);
     }
 
     @Override
@@ -82,7 +81,7 @@ public class ArtistSearchFragment extends Fragment {
             final String search = mSearchText.getText().toString();
             if (!search.isEmpty()) {
                 outState.putString(Key.SEARCH_TEXT, search);
-                if (search.equals(mLastSearch)) {
+                if (search.equals(mRetainedState.getLastSearch())) {
                     shouldSearch = true;
                 }
             }
@@ -96,8 +95,6 @@ public class ArtistSearchFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_artist_search, container, false);
 
         mArtistsListView = (ListView) view.findViewById(R.id.artistListView);
-        mArtistsListView.setAdapter(mAdapter);
-
         mArtistsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parentAdapter, View view, int position, long id) {
@@ -131,11 +128,25 @@ public class ArtistSearchFragment extends Fragment {
                 return true;
             }
         });
-        // Restore state. Because we're running on a retained instance, this runs only when
-        // the app is restored after being evicted from memory, not on rotation changes.
+        return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mRetainedState = ArtistSearchStateFragment.getAssociatedInstance(getActivity());
+        mAdapter = new ArtistAdapter(getActivity(), R.layout.single_artist,
+                mRetainedState.getArtists());
+        mArtistsListView.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState!=null) {
             String searchStr = savedInstanceState.getString(Key.SEARCH_TEXT);
-            if (searchStr!=null && !searchStr.equals(mLastSearch)) {
+            if (searchStr!=null && !searchStr.equals(mRetainedState.getLastSearch())) {
+                //                 ^ false on rotation
                 Log.d(TAG, "restoring from saved state");
                 mSearchText.setText(searchStr);
                 boolean doSearch = savedInstanceState.getBoolean(Key.SHOULD_SEARCH);
@@ -144,24 +155,24 @@ public class ArtistSearchFragment extends Fragment {
                 }
             }
         }
-        return view;
     }
 
     private void runSearch(String searchStr) {
         Log.d(TAG, "searching for " + searchStr);
-        mLastSearch = searchStr;
+        mRetainedState.setLastSearch(searchStr);
         SpotifyService spot = mSpotApi.getService();
         spot.searchArtists(searchStr, new Callback<ArtistsPager>() {
             @Override
             public void success(final ArtistsPager pager, Response response) {
                 mLastTotal = pager.artists.total;
-                mArtists = ArtistInfo.listOf(pager.artists.items);
-                if (mArtists.isEmpty()) {
+                mRetainedState.setArtists(ArtistInfo.listOf(pager.artists.items));
+                final List<ArtistInfo> artists = mRetainedState.getArtists();
+                if (artists.isEmpty()) {
                     Util.showToast(getActivity(), "Sorry, no artists found with that name");
                     focusInput();
                 }
                 mAdapter.clear();
-                Util.adapterAddAll(mAdapter, mArtists);
+                Util.adapterAddAll(mAdapter, artists);
                 mArtistsListView.setSelectionAfterHeaderView();
 
                 // Workaround for ease of use with hardware keyboard
@@ -179,7 +190,7 @@ public class ArtistSearchFragment extends Fragment {
         if (offset>=mLastTotal) {
             return;
         }
-        final String searchStr = mLastSearch;
+        final String searchStr = mRetainedState.getLastSearch();
         Log.d(TAG, "searching for " + searchStr + " with offset " + offset);
         SpotifyService spot = mSpotApi.getService();
         Map<String,Object> options = new HashMap<>();
@@ -188,6 +199,7 @@ public class ArtistSearchFragment extends Fragment {
             @Override
             public void success(final ArtistsPager pager, Response response) {
                 ArrayList<ArtistInfo> newArtists = ArtistInfo.listOf(pager.artists.items);
+                mRetainedState.addArtists(newArtists);
                 Util.adapterAddAll(mAdapter, newArtists);
             }
             @Override
