@@ -21,7 +21,7 @@ import com.github.bysy.spotifystreamer.data.SongInfo;
 
 public class MainActivity extends AppCompatActivity
         implements ArtistSearchFragment.OnArtistSelected,
-        TopSongsFragment.ShouldLaunchDialogPlayer,
+        TopSongsFragment.LaunchPlayerDialog,
         PlayerDialog.HasPlayer {
 
     static class Key {
@@ -37,6 +37,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean shouldLaunchDialogPlayer() {
         return mIsMultiPane;
+    }
+
+    @Override
+    public void onLaunchPlayerDialog() {
+        invalidateOptionsMenu();
     }
 
     @NonNull

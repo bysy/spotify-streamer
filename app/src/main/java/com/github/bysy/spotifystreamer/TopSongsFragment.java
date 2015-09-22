@@ -40,7 +40,7 @@ import retrofit.client.Response;
 
 /**
  * Fragment to show the top songs of an artist. Parent classes can implement
- * ShouldLaunchDialogPlayer to signal if they prefer a dialog player or activity player.
+ * LaunchPlayerDialog to signal if they prefer a dialog player or activity player.
  */
 public class TopSongsFragment extends Fragment {
     static final String PLAYER_FRAGMENT_TAG = "PLAYER_FRAGMENT_TAG";
@@ -53,8 +53,9 @@ public class TopSongsFragment extends Fragment {
     private SongsAdapter mAdapter;
     private ArrayList<SongInfo> mSongs;
 
-    interface ShouldLaunchDialogPlayer {
+    interface LaunchPlayerDialog {
         boolean shouldLaunchDialogPlayer();
+        void onLaunchPlayerDialog();
     }
 
     public TopSongsFragment() {
@@ -99,13 +100,14 @@ public class TopSongsFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Open player dialog or activity at this song
                 final Activity activity = getActivity();
-                final boolean launchDialog = (activity instanceof ShouldLaunchDialogPlayer) &&
-                        ((ShouldLaunchDialogPlayer) activity).shouldLaunchDialogPlayer();
+                final boolean launchDialog = (activity instanceof LaunchPlayerDialog) &&
+                        ((LaunchPlayerDialog) activity).shouldLaunchDialogPlayer();
                 if (launchDialog) {
                     Player player = Player.getInstance();
                     player.setNewPlaylist(mSongs);
                     player.setCurrentIndex(position);
                     player.setAutoPlay(true);
+                    ((LaunchPlayerDialog) activity).onLaunchPlayerDialog();
                     PlayerDialog playerDialog = new PlayerDialog();
                     playerDialog.show(getActivity().getSupportFragmentManager(),
                             PLAYER_FRAGMENT_TAG);
