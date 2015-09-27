@@ -113,6 +113,7 @@ public class TopSongsFragment extends Fragment {
                             PLAYER_FRAGMENT_TAG);
                 } else {
                     Intent i = new Intent(getActivity(), PlayerActivity.class);
+                    i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     i.putExtra(Key.SONGS_PARCEL, mSongs);
                     i.putExtra(Key.CURRENT_SONG, position);
                     startActivity(i);

@@ -17,10 +17,12 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
 
+import com.github.bysy.spotifystreamer.MainActivity;
 import com.github.bysy.spotifystreamer.Player;
 import com.github.bysy.spotifystreamer.R;
 import com.github.bysy.spotifystreamer.data.SongInfo;
@@ -147,17 +149,13 @@ public class PlayerService extends Service implements MediaPlayer.OnPreparedList
         // Set lockscreen visibility
         builder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
 
-        // Don't assign an intent for the whole notification for now.
-        // It's not part of the optional rubric item, so I can get some zzz. =)
-        // TODO: Figure out how to go back to original activity
-        // FLAG_ACTIVITY_CLEAR_TOP doesn't do the trick. Nor the combo with new task.
-
-        //Intent intent = new Intent(this.getBaseContext(), MainActivity.class);
-        //intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        //TaskStackBuilder stack = TaskStackBuilder.create(this);
-        //stack.addNextIntent(intent);
-        //PendingIntent pi = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        //builder.setContentIntent(pi);
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        TaskStackBuilder stack = TaskStackBuilder.create(getApplicationContext());
+        stack.addNextIntent(intent);
+        PendingIntent pi = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        //PendingIntent pi = PendingIntent.getActivity(this, 0, intent, 0);
+        builder.setContentIntent(pi);
 
         Notification notification = builder.build();
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN) {

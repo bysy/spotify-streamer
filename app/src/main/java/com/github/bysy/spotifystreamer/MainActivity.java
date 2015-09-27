@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -94,6 +95,7 @@ public class MainActivity extends AppCompatActivity
             Intent i = new Intent(this, TopSongsActivity.class);
             i.putExtra(Key.ARTIST_NAME, artist.name);
             i.putExtra(Key.ARTIST_ID, artist.id);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(i);
         }
     }
