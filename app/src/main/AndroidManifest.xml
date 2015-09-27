@@ -27,7 +27,7 @@
             android:name=".TopSongsActivity"
             android:label="@string/title_activity_top_songs"
             android:parentActivityName=".MainActivity"
-            android:launchMode="singleTop" >
+            android:launchMode="singleInstance" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -36,7 +36,7 @@
             android:name=".PlayerActivity"
             android:label="@string/app_name"
             android:parentActivityName=".TopSongsActivity"
-            android:launchMode="singleTop" >
+            android:launchMode="singleInstance" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.github.bysy.spotifystreamer.TopSongsActivity" />

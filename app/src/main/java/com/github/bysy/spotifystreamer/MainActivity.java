@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity
                     TopSongsFragment.PLAYER_FRAGMENT_TAG);
         } else {
             Intent intent = new Intent(activity, PlayerActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             activity.startActivity(intent);
         }
     }
