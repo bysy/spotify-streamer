@@ -6,6 +6,7 @@ package com.github.bysy.spotifystreamer;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -21,31 +22,49 @@ public class TopSongsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_songs);
-        Intent in = getIntent();
-        String name = in.getStringExtra(MainActivity.Key.ARTIST_NAME);
+        final Intent in = getIntent();
+        final String id = handleIntent(in);
+        if (id==null) return;
+        if (savedInstanceState==null) {
+            updateFragment(id);
+        }
+    }
+
+    private void updateFragment(String id) {
+        final TopSongsFragment fragment = new TopSongsFragment();
+        final Bundle args = new Bundle();
+        args.putString(MainActivity.Key.ARTIST_ID, id);
+        fragment.setArguments(args);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.top_songs_container, fragment)
+                .commit();
+    }
+
+    @Nullable
+    private String handleIntent(Intent intent) {
+        String name = intent.getStringExtra(MainActivity.Key.ARTIST_NAME);
         if (name==null) name = "";
         if (name.isEmpty()) {
             Log.e(TAG, MainActivity.Key.ARTIST_NAME + " is missing");
             name = getString(R.string.app_name);
         }
-        ActionBar ab = getSupportActionBar();
+        final ActionBar ab = getSupportActionBar();
         if (ab!=null) {
             ab.setTitle(name);
         }
-        String id = in.getStringExtra(MainActivity.Key.ARTIST_ID);
+        final String id = intent.getStringExtra(MainActivity.Key.ARTIST_ID);
         if (id==null || id.isEmpty()) {
             Log.e(TAG, MainActivity.Key.ARTIST_ID.concat(" is missing"));
-            return;
+            return null;
         }
-        if (savedInstanceState==null) {
-            TopSongsFragment fragment = new TopSongsFragment();
-            Bundle args = new Bundle();
-            args.putString(MainActivity.Key.ARTIST_ID, id);
-            fragment.setArguments(args);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.top_songs_container, fragment)
-                    .commit();
-        }
+        return id;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        final String id = handleIntent(intent);
+        updateFragment(id);
     }
 
     @Override
